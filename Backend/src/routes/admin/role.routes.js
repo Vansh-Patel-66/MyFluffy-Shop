@@ -1,6 +1,7 @@
-import rolecontroller from "../";
-import permissioncontroller from "../permission.controller";
-import rolepermissioncontroller from "../rolepermission.controller";
+import express from "express";
+import * as rolecontroller from "../../controllers/admin/role.controller.js";
+import * as permissioncontroller from "../../controllers/admin/permission.controller.js";
+import * as rolepermissioncontroller from "../../controllers/admin/rolepermission.controller.js";
 
 const router = express.Router();
 

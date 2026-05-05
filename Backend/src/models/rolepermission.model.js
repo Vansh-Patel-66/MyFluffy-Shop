@@ -1,12 +1,14 @@
 import { DataTypes } from "sequelize";
-import dbConnection from "../config/database";
+import dbConnection from "../config/database.js";
+import Role from "./role.model.js";
+import Permission from "./permission.model.js";
 
 const RolePermission = dbConnection.define(
   "rolepermissions",
   {
     id: {
       type: DataTypes.UUID,
-      defaulValue: DataTypes.UUIDV4,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
     role_name: {
@@ -24,8 +26,10 @@ const RolePermission = dbConnection.define(
     updatedAt: "updated_at",
   },
 );
-RolePermission.belongsTo(Role, { foreignKey: "role_name" });
+
+RolePermission.belongsTo(Role, { foreignKey: "role_name", targetKey: "role_name" });
 RolePermission.belongsTo(Permission, { foreignKey: "permission_id" });
-Role.hasMany(RolePermission, { foreignKey: "role_name" });
+Role.hasMany(RolePermission, { foreignKey: "role_name", sourceKey: "role_name" });
 Permission.hasMany(RolePermission, { foreignKey: "permission_id" });
+
 export default RolePermission;

@@ -1,4 +1,6 @@
 import User from "../../models/user.model.js";
+import crypto from "crypto";
+import sendEmail from "../../utils/sendEmail.js";
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -53,19 +55,45 @@ export const createUser = async (req, res) => {
       });
     }
 
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+
     const newUser = await User.create({
       email,
       password,
       role: role || "user",
-      is_active: is_active !== undefined ? is_active : true,
+      is_active: false,
+      is_email_verified: false,
+      verification_token: verificationToken,
     });
 
-    const userResponse = newUser.toJSON();
-    delete userResponse.password;
+    const verificationUrl = `${req.protocol}://${req.get(
+      "host",
+    )}/api/users/verify/${verificationToken}`;
 
-    const token = newUser.generateToken();
+    const message = `Please verify your email by clicking the link below:\n\n${verificationUrl}`;
+    const html = `<h1>Email Verification</h1><p>Please verify your email by clicking the link below:</p><a href="${verificationUrl}">Verify Email</a>`;
 
-    res.status(201).json({ success: true, token, data: userResponse });
+    try {
+      await sendEmail({
+        email: newUser.email,
+        subject: "Email Verification - MyFluffyShop",
+        message,
+        html,
+      });
+
+      res.status(201).json({
+        success: true,
+        message:
+          "Registration successful. Please check your email to verify your account.",
+      });
+    } catch (error) {
+      console.error(error);
+      await newUser.destroy();
+      res.status(500).json({
+        success: false,
+        message: "Email could not be sent. Please try again later.",
+      });
+    }
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -123,12 +151,50 @@ export const loginUser = async (req, res) => {
         .json({ success: false, message: "Invalid credentials" });
     }
 
+    if (!user.is_email_verified) {
+      return res.status(401).json({
+        success: false,
+        message: "Please verify your email to login",
+      });
+    }
+
     const userResponse = user.toJSON();
     delete userResponse.password;
 
     const token = user.generateToken();
 
     res.status(200).json({ success: true, token, data: userResponse });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    const user = await User.findOne({
+      where: { verification_token: token },
+    });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Invalid or expired verification token",
+        });
+    }
+
+    user.is_email_verified = true;
+    user.is_active = true;
+    user.verification_token = null;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Email verified successfully. You can now login.",
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
