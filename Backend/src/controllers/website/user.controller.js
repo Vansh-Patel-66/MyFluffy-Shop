@@ -63,7 +63,9 @@ export const createUser = async (req, res) => {
     const userResponse = newUser.toJSON();
     delete userResponse.password;
 
-    res.status(201).json({ success: true, data: userResponse });
+    const token = newUser.generateToken();
+
+    res.status(201).json({ success: true, token, data: userResponse });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -98,6 +100,35 @@ export const deleteUserByEmail = async (req, res) => {
     } else {
       res.status(404).json({ success: false, message: "User not found" });
     }
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Email and password are required" });
+    }
+
+    const user = await User.findOne({ where: { email } });
+
+    if (!user || !(await user.comparePassword(password))) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
+    }
+
+    const userResponse = user.toJSON();
+    delete userResponse.password;
+
+    const token = user.generateToken();
+
+    res.status(200).json({ success: true, token, data: userResponse });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

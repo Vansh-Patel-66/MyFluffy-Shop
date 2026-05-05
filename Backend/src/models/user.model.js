@@ -1,6 +1,10 @@
 import { DataTypes } from "sequelize";
 import dbConnection from "../config/database.js";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const User = dbConnection.define(
   "users",
@@ -51,6 +55,16 @@ User.beforeUpdate(hashPassword);
 
 User.prototype.comparePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
+};
+
+User.prototype.generateToken = function () {
+  return jwt.sign(
+    { id: this.id, email: this.email, role: this.role },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRES_IN,
+    }
+  );
 };
 
 export default User;

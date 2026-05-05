@@ -4,15 +4,20 @@ import {
   getUserByEmail,
   createUser,
   updateUserByEmail,
-  deleteUserByEmail
+  deleteUserByEmail,
+  loginUser,
 } from "../../controllers/website/user.controller.js";
+import { protect } from "../../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-router.get("/", getAllUsers);
-router.post("/", createUser);
-router.get("/:email", getUserByEmail);
-router.put("/:email", updateUserByEmail);
-router.delete("/:email", deleteUserByEmail);
+router.post("/register", createUser);
+router.post("/login", loginUser);
+
+// Protected routes
+router.get("/", protect, getAllUsers);
+router.get("/:email", protect, getUserByEmail);
+router.put("/:email", protect, updateUserByEmail);
+router.delete("/:email", protect, deleteUserByEmail);
 
 export default router;
