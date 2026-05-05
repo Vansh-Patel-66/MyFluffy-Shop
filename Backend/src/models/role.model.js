@@ -1,12 +1,12 @@
 import { DataTypes } from "sequelize";
-import dbConnection from "../config/database";
+import dbConnection from "../config/database.js";
 
 const Role = dbConnection.define(
   "roles",
   {
     id: {
       type: DataTypes.UUID,
-      defaulValue: DataTypes.UUIDV4,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
     role_name: { type: DataTypes.STRING, allowNull: false, unique: true },

@@ -5,7 +5,7 @@ import {
   getFooterContentById,
   updateFooterContent,
   deleteFooterContent
-} from '../controllers/footer.controller.js';
+} from '../../controllers/website/footer.controller.js';
 
 const router = express.Router();
 

@@ -5,7 +5,7 @@ import {
   getOrderItemById,
   updateOrderItem,
   deleteOrderItem
-} from '../controllers/orderItem.controller.js';
+} from '../../controllers/admin/orderItem.controller.js';
 
 const router = express.Router();
 

@@ -6,6 +6,7 @@ import {
   updateUserByEmail,
   deleteUserByEmail,
   loginUser,
+  verifyEmail,
 } from "../../controllers/website/user.controller.js";
 import { protect } from "../../middleware/auth.middleware.js";
 
@@ -13,6 +14,7 @@ const router = express.Router();
 
 router.post("/register", createUser);
 router.post("/login", loginUser);
+router.get("/verify/:token", verifyEmail);
 
 // Protected routes
 router.get("/", protect, getAllUsers);

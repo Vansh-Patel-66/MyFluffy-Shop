@@ -32,7 +32,15 @@ const User = dbConnection.define(
     },
     is_active: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true,
+      defaultValue: false,
+    },
+    is_email_verified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    verification_token: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
   },
   {
@@ -63,7 +71,7 @@ User.prototype.generateToken = function () {
     process.env.JWT_SECRET,
     {
       expiresIn: process.env.JWT_EXPIRES_IN,
-    }
+    },
   );
 };
 

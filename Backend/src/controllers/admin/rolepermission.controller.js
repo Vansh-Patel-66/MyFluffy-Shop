@@ -1,4 +1,4 @@
-import rolecontroller from "../role.controller";
+import RolePermission from "../../models/rolepermission.model.js";
 
 export const createRolePermission = async (req, res) => {
   try {
@@ -13,6 +13,31 @@ export const getRolePermissionById = async (req, res) => {
   try {
     const record = await RolePermission.findByPk(req.params.id);
     if (record) res.status(200).json(record);
+    else res.status(404).json({ error: "Record not found" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+export const updateRolePermission = async (req, res) => {
+  try {
+    const [updated] = await RolePermission.update(req.body, {
+      where: { id: req.params.id },
+    });
+    if (updated) {
+      const updatedRecord = await RolePermission.findByPk(req.params.id);
+      res.status(200).json(updatedRecord);
+    } else res.status(404).json({ error: "Record not found" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const deleteRolePermission = async (req, res) => {
+  try {
+    const deleted = await RolePermission.destroy({
+      where: { id: req.params.id },
+    });
+    if (deleted) res.status(204).send();
     else res.status(404).json({ error: "Record not found" });
   } catch (error) {
     res.status(500).json({ error: error.message });
