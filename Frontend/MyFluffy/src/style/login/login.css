@@ -1,0 +1,139 @@
+/* src/style/login/login.css */
+
+.auth-card {
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 28px;
+  /* Soft blue shadow to look like a cloud */
+  box-shadow: 0 20px 40px rgba(144, 202, 249, 0.2);
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+h2 {
+  color: #1e88e5;
+  margin-bottom: 8px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.shop-subtitle {
+  color: #90caf9;
+  font-weight: 600;
+  margin-bottom: 25px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.form-group {
+  text-align: left;
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  color: #5c7893;
+  margin-left: 5px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #f0f7ff;
+  border-radius: 14px;
+  background: #f8fbff;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+
+.form-group input:focus {
+  border-color: #90caf9;
+  outline: none;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(144, 202, 249, 0.1);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 15px;
+  background: #90caf9;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: #1e88e5;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(30, 136, 229, 0.3);
+}
+
+.divider {
+  margin: 25px 0;
+  display: flex;
+  align-items: center;
+  color: #a0b1c5;
+  font-size: 0.8rem;
+}
+
+.divider::before, .divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e3f2fd;
+}
+
+.divider span {
+  padding: 0 10px;
+}
+
+.social-container {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-social {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border: 2px solid #f0f7ff;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #5c7893;
+  transition: 0.2s;
+}
+
+.btn-social:hover {
+  background: #f1f8ff;
+  border-color: #e3f2fd;
+}
+
+.toggle-text {
+  margin-top: 25px;
+  font-size: 0.9rem;
+  color: #78909c;
+}
+
+.toggle-text span {
+  color: #1e88e5;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
