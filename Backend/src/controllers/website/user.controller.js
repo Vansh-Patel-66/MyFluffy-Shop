@@ -70,8 +70,21 @@ export const createUser = async (req, res) => {
       "host",
     )}/api/users/verify/${verificationToken}`;
 
-    const message = `Please verify your email by clicking the link below:\n\n${verificationUrl}`;
-    const html = `<h1>Email Verification</h1><p>Please verify your email by clicking the link below:</p><a href="${verificationUrl}">Verify Email</a>`;
+    const message = `Welcome to MyFluffyShop!\n\nThank you for registering. Please verify your email by clicking the link below:\n\n${verificationUrl}\n\nIf you did not request this, please ignore this email.`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+        <h2 style="color: #333; text-align: center;">Welcome to MyFluffyShop!</h2>
+        <p>Hi there,</p>
+        <p>Thank you for signing up for MyFluffyShop. We're excited to have you! To get started, please confirm your email address by clicking the button below:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${verificationUrl}" style="background-color: #4CAF50; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Verify My Email</a>
+        </div>
+        <p>Or copy and paste this link into your browser:</p>
+        <p style="word-break: break-all; color: #555;">${verificationUrl}</p>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+        <p style="font-size: 12px; color: #888;">If you didn't create an account, you can safely ignore this email.</p>
+      </div>
+    `;
 
     try {
       await sendEmail({
@@ -178,12 +191,10 @@ export const verifyEmail = async (req, res) => {
     });
 
     if (!user) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Invalid or expired verification token",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired verification token",
+      });
     }
 
     user.is_email_verified = true;
