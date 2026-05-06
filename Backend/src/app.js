@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import dbConnection from "./config/database.js";
 import cronJobs from "./utils/cronJobs.js";
+import logger from "./utils/logger.js";
 import { Server } from "socket.io";
 import websiteUserRoutes from "./routes/website/user.routes.js";
 import categoryRoutes from "./routes/admin/category.routes.js";
@@ -54,15 +55,15 @@ dbConnection
     return dbConnection.sync({ alter: true });
   })
   .then(() => {
-    console.log("Database synchronized successfully.");
+    logger.info("Database synchronized successfully.");
   })
   .catch((error) => {
-    console.error("Unable to connect to the database:", error.message);
+    logger.error(`Unable to connect to the database: ${error.message}`);
   });
 
 //start normal express server
 const server = app.listen(process.env.PORT, () => {
-  console.log(`server is running on http://localhost:${process.env.PORT}`);
+  logger.info(`server is running on http://localhost:${process.env.PORT}`);
 });
 
 const io = new Server(server, {
