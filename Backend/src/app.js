@@ -1,6 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import dbConnection from "./config/database.js";
+import cronJobs from "./utils/cronJobs.js";
+import { Server } from "socket.io";
 import websiteUserRoutes from "./routes/website/user.routes.js";
 import categoryRoutes from "./routes/admin/category.routes.js";
 import productRoutes from "./routes/admin/product.routes.js";
@@ -19,6 +21,12 @@ import roleRoutes from "./routes/admin/role.routes.js";
 const app = express();
 
 dotenv.config();
+
+if (process.env.NODE_ENV !== "development") {
+  cronJobs.createBackUpFile();
+} else {
+  cronJobs.createBackUpFile();
+}
 
 // Middleware
 app.use(express.json());
@@ -39,6 +47,7 @@ app.use("/api/footer", footerRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/role", roleRoutes);
 
+//connect database and create tables
 dbConnection
   .authenticate()
   .then(() => {
@@ -51,6 +60,21 @@ dbConnection
     console.error("Unable to connect to the database:", error.message);
   });
 
-app.listen(process.env.PORT, () => {
+//start normal express server
+const server = app.listen(process.env.PORT, () => {
   console.log(`server is running on http://localhost:${process.env.PORT}`);
+});
+
+const io = new Server(server, {
+  transports: ["polling"],
+  cors: { origin: "*" },
+});
+
+//socket.io connection
+io.on("connection", (socket) => {
+  socket.on("join", (room) => {
+    console.log(room, "this is room");
+    socket.join(room);
+  });
+  socket.on("disconnect", () => {});
 });
