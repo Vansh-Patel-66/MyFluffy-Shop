@@ -1,7 +1,16 @@
-import ProductImage from '../../models/productImage.model.js';
+import ProductImage from "../../models/productImage.model.js";
 
 export const createProductImage = async (req, res) => {
   try {
+    // If an image was uploaded via Multer, use the Cloudinary URL
+    if (req.file && req.file.path) {
+      req.body.image_url = req.file.path;
+    } else if (!req.body.image_url) {
+      return res
+        .status(400)
+        .json({ error: "No image provided. Please upload an image." });
+    }
+
     const newRecord = await ProductImage.create(req.body);
     res.status(201).json(newRecord);
   } catch (error) {
@@ -13,7 +22,7 @@ export const getProductImages = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
     const records = await ProductImage.findAll();
-    
+
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
     const paginatedRecords = records.slice(startIndex, endIndex);
@@ -22,7 +31,7 @@ export const getProductImages = async (req, res) => {
       total: records.length,
       page: parseInt(page),
       limit: parseInt(limit),
-      data: paginatedRecords
+      data: paginatedRecords,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -33,7 +42,7 @@ export const getProductImageById = async (req, res) => {
   try {
     const record = await ProductImage.findByPk(req.params.id);
     if (record) res.status(200).json(record);
-    else res.status(404).json({ error: 'Record not found' });
+    else res.status(404).json({ error: "Record not found" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -41,11 +50,13 @@ export const getProductImageById = async (req, res) => {
 
 export const updateProductImage = async (req, res) => {
   try {
-    const [updated] = await ProductImage.update(req.body, { where: { id: req.params.id } });
+    const [updated] = await ProductImage.update(req.body, {
+      where: { id: req.params.id },
+    });
     if (updated) {
       const updatedRecord = await ProductImage.findByPk(req.params.id);
       res.status(200).json(updatedRecord);
-    } else res.status(404).json({ error: 'Record not found' });
+    } else res.status(404).json({ error: "Record not found" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -53,9 +64,11 @@ export const updateProductImage = async (req, res) => {
 
 export const deleteProductImage = async (req, res) => {
   try {
-    const deleted = await ProductImage.destroy({ where: { id: req.params.id } });
+    const deleted = await ProductImage.destroy({
+      where: { id: req.params.id },
+    });
     if (deleted) res.status(204).send();
-    else res.status(404).json({ error: 'Record not found' });
+    else res.status(404).json({ error: "Record not found" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
