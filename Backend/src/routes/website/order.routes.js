@@ -1,4 +1,6 @@
 import express from 'express';
+import validate from '../../middleware/validate.middleware.js';
+import { createOrderSchema, updateOrderSchema } from '../../validations/order.validation.js';
 import {
   createOrder,
   getOrders,
@@ -9,10 +11,10 @@ import {
 
 const router = express.Router();
 
-router.post('/', createOrder);
+router.post('/', validate(createOrderSchema), createOrder);
 router.get('/', getOrders);
 router.get('/:id', getOrderById);
-router.put('/:id', updateOrder);
+router.put('/:id', validate(updateOrderSchema), updateOrder);
 router.delete('/:id', deleteOrder);
 
 export default router;
