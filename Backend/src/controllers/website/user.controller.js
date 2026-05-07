@@ -1,7 +1,9 @@
 import User from "../../models/user.model.js";
 import crypto from "crypto";
 import sendEmail from "../../utils/sendEmail.js";
+import Joi from "joi";
 
+//get all users
 export const getAllUsers = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
@@ -25,6 +27,7 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
+//get user by email
 export const getUserByEmail = async (req, res) => {
   try {
     const record = await User.findOne({
@@ -38,15 +41,24 @@ export const getUserByEmail = async (req, res) => {
   }
 };
 
+//create user with email verification
 export const createUser = async (req, res) => {
   try {
-    const { email, password, role, is_active } = req.body;
+    const schema = Joi.object({
+      email: Joi.string().email().required(),
+      password: Joi.string().min(6).required(),
+      role: Joi.string().valid("user", "admin").optional(),
+      is_active: Joi.boolean().optional(),
+    });
 
-    if (!email || !password) {
+    const { error } = schema.validate(req.body);
+    if (error) {
       return res
         .status(400)
-        .json({ success: false, message: "Email and password are required" });
+        .json({ success: false, message: error.details[0].message });
     }
+
+    const { email, password, role, is_active } = req.body;
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
       return res.status(400).json({
@@ -112,6 +124,7 @@ export const createUser = async (req, res) => {
   }
 };
 
+//update user by email
 export const updateUserByEmail = async (req, res) => {
   try {
     const [updated] = await User.update(req.body, {
@@ -131,6 +144,7 @@ export const updateUserByEmail = async (req, res) => {
   }
 };
 
+//delete user by email
 export const deleteUserByEmail = async (req, res) => {
   try {
     const deleted = await User.destroy({
@@ -146,15 +160,22 @@ export const deleteUserByEmail = async (req, res) => {
   }
 };
 
+//login user
 export const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const schema = Joi.object({
+      email: Joi.string().email().required(),
+      password: Joi.string().required(),
+    });
 
-    if (!email || !password) {
+    const { error } = schema.validate(req.body);
+    if (error) {
       return res
         .status(400)
-        .json({ success: false, message: "Email and password are required" });
+        .json({ success: false, message: error.details[0].message });
     }
+
+    const { email, password } = req.body;
 
     const user = await User.findOne({ where: { email } });
 
@@ -182,6 +203,7 @@ export const loginUser = async (req, res) => {
   }
 };
 
+//verify email
 export const verifyEmail = async (req, res) => {
   try {
     const { token } = req.params;
