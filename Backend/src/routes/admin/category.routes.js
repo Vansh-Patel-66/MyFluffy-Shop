@@ -1,4 +1,6 @@
 import express from 'express';
+import validate from '../../middleware/validate.middleware.js';
+import { createCategorySchema, updateCategorySchema } from '../../validations/category.validation.js';
 import {
   createCategory,
   getCategories,
@@ -9,10 +11,10 @@ import {
 
 const router = express.Router();
 
-router.post('/', createCategory);
+router.post('/', validate(createCategorySchema), createCategory);
 router.get('/', getCategories);
 router.get('/:id', getCategoryById);
-router.put('/:id', updateCategory);
+router.put('/:id', validate(updateCategorySchema), updateCategory);
 router.delete('/:id', deleteCategory);
 
 export default router;
