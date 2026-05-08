@@ -1,13 +1,16 @@
-import express from 'express';
-import validate from '../../middleware/validate.middleware.js';
-import { createOrderSchema, updateOrderSchema } from '../../validations/order.validation.js';
+import express from "express";
+import validate from "../../middleware/validate.middleware.js";
+import {
+  createOrderSchema,
+  updateOrderSchema,
+} from "../../validations/order.validation.js";
 import {
   createOrder,
   getOrders,
   getOrderById,
   updateOrder,
-  deleteOrder
-} from '../../controllers/website/order.controller.js';
+  deleteOrder,
+} from "../../controllers/website/order.controller.js";
 
 const router = express.Router();
 
@@ -44,8 +47,8 @@ const router = express.Router();
  *       200:
  *         description: List of orders
  */
-router.post('/', validate(createOrderSchema), createOrder);
-router.get('/', getOrders);
+router.post("/", validate(createOrderSchema), createOrder);
+router.get("/", getOrders);
 
 /**
  * @swagger
@@ -99,8 +102,8 @@ router.get('/', getOrders);
  *       204:
  *         description: Deleted successfully
  */
-router.get('/:id', getOrderById);
-router.put('/:id', validate(updateOrderSchema), updateOrder);
-router.delete('/:id', deleteOrder);
+router.get("/:id", getOrderById);
+router.put("/:id", validate(updateOrderSchema), updateOrder);
+router.delete("/:id", deleteOrder);
 
 export default router;
