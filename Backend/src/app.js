@@ -8,6 +8,14 @@ import dbConnection from "./config/database.js";
 import cronJobs from "./utils/cronJobs.js";
 import logger from "./utils/logger.js";
 import { Server } from "socket.io";
+import cors from "cors";
+
+// Catch uncaught exceptions before they crash the process silently
+process.on("uncaughtException", (err) => {
+  logger.error(`Uncaught Exception: ${err.message}`);
+  process.exit(1);
+});
+
 import websiteUserRoutes from "./routes/website/user.routes.js";
 import categoryRoutes from "./routes/admin/category.routes.js";
 import productRoutes from "./routes/admin/product.routes.js";
@@ -35,6 +43,10 @@ if (process.env.NODE_ENV !== "development") {
 
 // Middleware
 app.use(helmet());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "*",
+  credentials: true,
+}));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -90,6 +102,17 @@ app.use("/api/footer", footerRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/role", roleRoutes);
 
+// Global Error Handler Middleware
+app.use((err, req, res, next) => {
+  logger.error(`Error: ${err.message}\nStack: ${err.stack}`);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+    // Only send stack traces in development mode
+    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+  });
+});
+
 //connect database and create tables
 dbConnection
   .authenticate()
@@ -107,6 +130,33 @@ dbConnection
 const server = app.listen(process.env.PORT, () => {
   logger.info(`server is running on http://localhost:${process.env.PORT}`);
 });
+
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (err) => {
+  logger.error(`Unhandled Rejection: ${err.message}`);
+  server.close(() => {
+    process.exit(1);
+  });
+});
+
+// Graceful Shutdown on termination signals
+const gracefulShutdown = async () => {
+  logger.info("SIGINT/SIGTERM received. Shutting down gracefully...");
+  server.close(async () => {
+    logger.info("HTTP server closed.");
+    try {
+      await dbConnection.close();
+      logger.info("Database connection closed.");
+      process.exit(0);
+    } catch (err) {
+      logger.error(`Error during database disconnection: ${err.message}`);
+      process.exit(1);
+    }
+  });
+};
+
+process.on("SIGINT", gracefulShutdown);
+process.on("SIGTERM", gracefulShutdown);
 
 const io = new Server(server, {
   transports: ["polling"],
