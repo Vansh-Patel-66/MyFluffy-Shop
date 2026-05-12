@@ -35,10 +35,12 @@ const app = express();
 
 dotenv.config();
 
-if (process.env.NODE_ENV !== "development") {
-  cronJobs.createBackUpFile();
-} else {
-  cronJobs.createBackUpFile();
+if (process.env.NODE_ENV !== "test") {
+  if (process.env.NODE_ENV !== "development") {
+    cronJobs.createBackUpFile();
+  } else {
+    cronJobs.createBackUpFile();
+  }
 }
 
 // Middleware
@@ -113,61 +115,66 @@ app.use((err, req, res, next) => {
   });
 });
 
-//connect database and create tables
-dbConnection
-  .authenticate()
-  .then(() => {
-    return dbConnection.sync({ alter: true });
-  })
-  .then(() => {
-    logger.info("Database synchronized successfully.");
-  })
-  .catch((error) => {
-    logger.error(`Unable to connect to the database: ${error.message}`);
+// Ensure server and database only start if we are not running tests
+if (process.env.NODE_ENV !== "test") {
+  //connect database and create tables
+  dbConnection
+    .authenticate()
+    .then(() => {
+      return dbConnection.sync({ alter: true });
+    })
+    .then(() => {
+      logger.info("Database synchronized successfully.");
+    })
+    .catch((error) => {
+      logger.error(`Unable to connect to the database: ${error.message}`);
+    });
+
+  //start normal express server
+  const server = app.listen(process.env.PORT, () => {
+    logger.info(`server is running on http://localhost:${process.env.PORT}`);
   });
 
-//start normal express server
-const server = app.listen(process.env.PORT, () => {
-  logger.info(`server is running on http://localhost:${process.env.PORT}`);
-});
-
-// Handle unhandled promise rejections
-process.on("unhandledRejection", (err) => {
-  logger.error(`Unhandled Rejection: ${err.message}`);
-  server.close(() => {
-    process.exit(1);
-  });
-});
-
-// Graceful Shutdown on termination signals
-const gracefulShutdown = async () => {
-  logger.info("SIGINT/SIGTERM received. Shutting down gracefully...");
-  server.close(async () => {
-    logger.info("HTTP server closed.");
-    try {
-      await dbConnection.close();
-      logger.info("Database connection closed.");
-      process.exit(0);
-    } catch (err) {
-      logger.error(`Error during database disconnection: ${err.message}`);
+  // Handle unhandled promise rejections
+  process.on("unhandledRejection", (err) => {
+    logger.error(`Unhandled Rejection: ${err.message}`);
+    server.close(() => {
       process.exit(1);
-    }
+    });
   });
-};
 
-process.on("SIGINT", gracefulShutdown);
-process.on("SIGTERM", gracefulShutdown);
+  // Graceful Shutdown on termination signals
+  const gracefulShutdown = async () => {
+    logger.info("SIGINT/SIGTERM received. Shutting down gracefully...");
+    server.close(async () => {
+      logger.info("HTTP server closed.");
+      try {
+        await dbConnection.close();
+        logger.info("Database connection closed.");
+        process.exit(0);
+      } catch (err) {
+        logger.error(`Error during database disconnection: ${err.message}`);
+        process.exit(1);
+      }
+    });
+  };
 
-const io = new Server(server, {
-  transports: ["polling"],
-  cors: { origin: "*" },
-});
+  process.on("SIGINT", gracefulShutdown);
+  process.on("SIGTERM", gracefulShutdown);
 
-//socket.io connection
-io.on("connection", (socket) => {
-  socket.on("join", (room) => {
-    console.log(room, "this is room");
-    socket.join(room);
+  const io = new Server(server, {
+    transports: ["polling"],
+    cors: { origin: "*" },
   });
-  socket.on("disconnect", () => {});
-});
+
+  //socket.io connection
+  io.on("connection", (socket) => {
+    socket.on("join", (room) => {
+      console.log(room, "this is room");
+      socket.join(room);
+    });
+    socket.on("disconnect", () => {});
+  });
+}
+
+export default app;
