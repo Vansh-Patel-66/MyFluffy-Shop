@@ -12,6 +12,10 @@ const proConfig = {
   },
 };
 
-const dbConnection = new Sequelize(process.env.PG_DB_URL, proConfig);
+const dbUrl = process.env.NODE_ENV === "test" 
+  ? process.env.PG_TEST_DB_URL 
+  : process.env.PG_DB_URL;
+
+const dbConnection = new Sequelize(dbUrl, proConfig);
 
 export default dbConnection;
