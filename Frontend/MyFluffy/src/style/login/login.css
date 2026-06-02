@@ -1,139 +1,217 @@
-/* src/style/login/login.css */
-
-.auth-card {
-  background: #ffffff;
-  padding: 40px;
-  border-radius: 28px;
-  /* Soft blue shadow to look like a cloud */
-  box-shadow: 0 20px 40px rgba(144, 202, 249, 0.2);
-  width: 90%;
-  max-width: 400px;
-  text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+.auth-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 40px 20px;
 }
 
-h2 {
-  color: #1e88e5;
-  margin-bottom: 8px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
+.auth-card {
+  width: 100%;
+  max-width: 460px;
+  padding: 40px;
+  border-radius: var(--radius-lg) !important;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.brand-logo {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  animation: logo-bounce 2s ease-in-out infinite;
+}
+
+@keyframes logo-bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.auth-header h2 {
+  font-size: 1.8rem;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
 }
 
 .shop-subtitle {
-  color: #90caf9;
-  font-weight: 600;
-  margin-bottom: 25px;
   font-size: 0.9rem;
-  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 4px;
 }
 
-.form-group {
-  text-align: left;
-  margin-bottom: 18px;
-}
-
-.form-group label {
+.validation-alert {
+  background: hsl(350, 80%, 95%);
+  color: var(--danger);
+  border: 1px solid hsl(350, 80%, 90%);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  margin-bottom: 24px;
   font-size: 0.85rem;
-  color: #5c7893;
-  margin-left: 5px;
-  display: block;
-  margin-bottom: 6px;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 14px 16px;
-  border: 2px solid #f0f7ff;
-  border-radius: 14px;
-  background: #f8fbff;
-  transition: all 0.3s ease;
-  box-sizing: border-box;
-  font-size: 1rem;
-}
-
-.form-group input:focus {
-  border-color: #90caf9;
-  outline: none;
-  background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(144, 202, 249, 0.1);
-}
-
-.btn-primary {
-  width: 100%;
-  padding: 15px;
-  background: #90caf9;
-  color: white;
-  border: none;
-  border-radius: 14px;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  margin-top: 10px;
-  transition: all 0.3s ease;
-}
-
-.btn-primary:hover {
-  background: #1e88e5;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(30, 136, 229, 0.3);
-}
-
-.divider {
-  margin: 25px 0;
+  font-weight: 500;
   display: flex;
   align-items: center;
-  color: #a0b1c5;
-  font-size: 0.8rem;
+  gap: 8px;
+  animation: shake 0.3s ease-in-out;
 }
 
-.divider::before, .divider::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: #e3f2fd;
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
 }
 
-.divider span {
-  padding: 0 10px;
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 16px;
+  color: var(--text-muted);
+}
+
+.input-with-icon input {
+  width: 100%;
+  padding-left: 48px !important;
+  padding-right: 48px !important;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 16px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-smooth);
+}
+
+.password-toggle-btn:hover {
+  color: var(--primary);
+}
+
+.role-selector-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.role-btn {
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid var(--border-glass);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: var(--transition-bounce);
+}
+
+.role-btn:hover {
+  background: var(--primary-light);
+  border-color: hsla(var(--primary-hue), 85%, 85%, 0.6);
+}
+
+.role-btn.active {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: 0 4px 12px rgba(100, 110, 240, 0.1);
+}
+
+.role-btn.admin-role-btn.active {
+  background: hsl(325, 80%, 95%);
+  border-color: var(--secondary);
+  color: var(--secondary);
+  box-shadow: 0 4px 12px rgba(240, 70, 150, 0.1);
+}
+
+.auth-submit-btn {
+  width: 100%;
+  margin-top: 12px;
+  justify-content: center;
+}
+
+.small-spinner {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
 }
 
 .social-container {
-  display: flex;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .btn-social {
-  flex: 1;
+  background: white;
+  border: 1.5px solid var(--border-glass);
+  padding: 12px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 12px;
-  border: 2px solid #f0f7ff;
-  border-radius: 12px;
-  background: white;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #5c7893;
-  transition: 0.2s;
+  transition: var(--transition-smooth);
 }
 
 .btn-social:hover {
-  background: #f1f8ff;
-  border-color: #e3f2fd;
+  background: var(--bg-app);
+  border-color: var(--text-muted);
+  transform: translateY(-1px);
 }
 
 .toggle-text {
-  margin-top: 25px;
+  text-align: center;
   font-size: 0.9rem;
-  color: #78909c;
+  color: var(--text-muted);
 }
 
-.toggle-text span {
-  color: #1e88e5;
+.toggle-link {
+  color: var(--primary);
   font-weight: 700;
   cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.toggle-link:hover {
   text-decoration: underline;
-  text-underline-offset: 3px;
+  color: var(--primary-hover);
+}
+
+/* Page fade in animation */
+.animate-fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
