@@ -1,39 +1,102 @@
-import React, { useState } from 'react';
-import Login from './component/Login/login';
-import Home from './component/home/home';
-import './App.css';
+import React, { useState } from "react";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { CartProvider } from "./context/CartContext";
 
-function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return localStorage.getItem('isLoggedIn') === 'true';
-  });
+// Component imports
+import Navbar from "./component/Navbar/Navbar";
+import Toast from "./component/Toast/Toast";
+import Login from "./component/Login/login";
+import Home from "./component/home/home";
+import Shop from "./component/Shop/Shop";
+import ProductDetailsModal from "./component/ProductDetails/ProductDetailsModal";
+import CartDrawer from "./component/Cart/CartDrawer";
+import Checkout from "./component/Checkout/Checkout";
+import Orders from "./component/Orders/Orders";
+import Contact from "./component/Contact/Contact";
+import AdminDashboard from "./component/Admin/AdminDashboard";
 
-  const [userEmail, setUserEmail] = useState(() => {
-    return localStorage.getItem('userEmail') || "";
-  });
+import "./App.css";
 
-  const handleLogin = (email) => {
-    setUserEmail(email);
-    setIsLoggedIn(true);
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userEmail', email);
+function AppContent() {
+  const { user } = useAuth();
+  const [activePage, setActivePage] = useState("home");
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const handleLoginSuccess = () => {
+    setActivePage("home");
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUserEmail("");
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userEmail');
+  const renderActivePage = () => {
+    switch (activePage) {
+      case "shop":
+        return <Shop setSelectedProduct={setSelectedProduct} />;
+      case "contact":
+        return <Contact />;
+      case "orders":
+        return <Orders />;
+      case "checkout":
+        return <Checkout setActivePage={setActivePage} />;
+      case "admin":
+        if (user && user.role === "admin") {
+          return <AdminDashboard />;
+        }
+        return <Home setActivePage={setActivePage} setSelectedProduct={setSelectedProduct} />;
+      case "login":
+        if (user) {
+          return <Home setActivePage={setActivePage} setSelectedProduct={setSelectedProduct} />;
+        }
+        return <Login onLoginSuccess={handleLoginSuccess} />;
+      case "home":
+      default:
+        return (
+          <Home
+            userEmail={user ? user.email : "Guest"}
+            setActivePage={setActivePage}
+            setSelectedProduct={setSelectedProduct}
+          />
+        );
+    }
   };
 
   return (
     <div className="app-viewport">
-      {isLoggedIn ? (
-        <Home userEmail={userEmail} onLogout={handleLogout} />
-      ) : (
-        <Login onLoginSuccess={handleLogin} />
-      )}
+      {/* Dynamic Navigation Header */}
+      <Navbar
+        activePage={activePage}
+        setActivePage={setActivePage}
+        onCartToggle={() => setIsCartOpen(!isCartOpen)}
+      />
+
+      {/* Main Container */}
+      <main style={{ flex: 1, paddingBottom: "60px" }}>
+        {renderActivePage()}
+      </main>
+
+      {/* Global Interactive Overlays */}
+      <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        setActivePage={setActivePage}
+      />
+
+      <ProductDetailsModal
+        product={selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+      />
+
+      <Toast />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <CartProvider>
+        <AppContent />
+      </CartProvider>
+    </AuthProvider>
   );
 }
 
