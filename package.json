@@ -1,0 +1,13 @@
+{
+  "name": "myfluffy-shop-root",
+  "version": "1.0.0",
+  "description": "Root workspace orchestrator for MyFluffy Shop",
+  "private": true,
+  "scripts": {
+    "install-all": "npm install && npm install --prefix Backend && npm install --prefix Frontend/MyFluffy",
+    "dev": "concurrently \"npm run dev --prefix Backend\" \"npm run dev --prefix Frontend/MyFluffy\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

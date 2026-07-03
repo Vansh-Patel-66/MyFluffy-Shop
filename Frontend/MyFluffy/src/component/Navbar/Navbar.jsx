@@ -46,6 +46,12 @@ const Navbar = ({ activePage, setActivePage, onCartToggle }) => {
             🛍️ Shop Catalog
           </button>
           <button 
+            className={`nav-link-btn ${activePage === "about" ? "active" : ""}`}
+            onClick={() => handleNavClick("about")}
+          >
+            ℹ️ About Us
+          </button>
+          <button 
             className={`nav-link-btn ${activePage === "contact" ? "active" : ""}`}
             onClick={() => handleNavClick("contact")}
           >

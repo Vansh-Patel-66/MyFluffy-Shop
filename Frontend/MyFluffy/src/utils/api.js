@@ -55,7 +55,7 @@ export const authAPI = {
 export const productAPI = {
   getAll: async () => {
     const response = await api.get("/products");
-    return response.data; // List of products
+    return response.data?.data || response.data;
   },
   getById: async (id) => {
     const response = await api.get(`/products/${id}`);
@@ -78,7 +78,7 @@ export const productAPI = {
 export const categoryAPI = {
   getAll: async () => {
     const response = await api.get("/categories");
-    return response.data; // List of categories
+    return response.data?.data || response.data;
   },
   getById: async (id) => {
     const response = await api.get(`/categories/${id}`);
