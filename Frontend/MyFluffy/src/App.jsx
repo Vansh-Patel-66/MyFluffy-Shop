@@ -13,6 +13,7 @@ import CartDrawer from "./component/Cart/CartDrawer";
 import Checkout from "./component/Checkout/Checkout";
 import Orders from "./component/Orders/Orders";
 import Contact from "./component/Contact/Contact";
+import AboutUs from "./component/AboutUs/AboutUs";
 import AdminDashboard from "./component/Admin/AdminDashboard";
 
 import "./App.css";
@@ -33,6 +34,8 @@ function AppContent() {
         return <Shop setSelectedProduct={setSelectedProduct} />;
       case "contact":
         return <Contact />;
+      case "about":
+        return <AboutUs setActivePage={setActivePage} />;
       case "orders":
         return <Orders />;
       case "checkout":
