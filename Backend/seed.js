@@ -136,6 +136,18 @@ async function seed() {
         is_email_verified: true,
       }
     });
+
+    // Seed admin@myfluffy.shop with admin123
+    await User.findOrCreate({
+      where: { email: "admin@myfluffy.shop" },
+      defaults: {
+        email: "admin@myfluffy.shop",
+        password: "admin123",
+        role: "admin",
+        is_active: true,
+        is_email_verified: true,
+      }
+    });
     console.log("Users seeded successfully.");
 
     // 4. Seed default address for normal user

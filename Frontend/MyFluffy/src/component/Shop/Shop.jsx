@@ -1,21 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { productAPI, categoryAPI } from "../../utils/api";
 import { useCart } from "../../context/CartContext";
-import { Search, Filter, Eye, Heart, ShoppingCart, SlidersHorizontal, Grid, List } from "lucide-react";
+import { Star } from "lucide-react";
 import "../../style/shop.css";
 
-const Shop = ({ setSelectedProduct }) => {
+const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelectedCategory: setExternalCategory }) => {
   const { addToCart } = useCart();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Filters state
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [maxPrice, setMaxPrice] = useState(2500);
-  const [sortBy, setSortBy] = useState("featured");
-  const [isListView, setIsListView] = useState(false);
+  const [maxPrice, setMaxPrice] = useState(200);
+  const [sortBy, setSortBy] = useState("popularity");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,8 +34,34 @@ const Shop = ({ setSelectedProduct }) => {
     fetchData();
   }, []);
 
+  // Sync external category filter from Navbar if set
+  useEffect(() => {
+    if (externalCategory) {
+      // Find matching category object
+      const cat = categories.find(
+        (c) =>
+          c.id === externalCategory ||
+          c.name.toLowerCase().includes(externalCategory.toLowerCase()) ||
+          externalCategory.toLowerCase().includes(c.name.toLowerCase()) ||
+          (externalCategory.toLowerCase() === "soft toys" && c.name.toLowerCase().includes("plush"))
+      );
+      if (cat) {
+        setSelectedCategory(cat.id);
+      } else if (externalCategory === "all") {
+        setSelectedCategory("all");
+      }
+    }
+  }, [externalCategory, categories]);
+
   const handleProductClick = (product) => {
     setSelectedProduct(product);
+  };
+
+  const handleCategorySelect = (catId) => {
+    setSelectedCategory(catId);
+    if (setExternalCategory) {
+      setExternalCategory(catId);
+    }
   };
 
   // Filter and Sort Logic
@@ -46,70 +70,75 @@ const Shop = ({ setSelectedProduct }) => {
       // 1. Active status check
       if (!product.is_active) return false;
 
-      // 2. Search query check
-      const query = searchQuery.toLowerCase();
-      const matchesSearch =
-        product.name.toLowerCase().includes(query) ||
-        (product.description && product.description.toLowerCase().includes(query));
+      // 2. Category check
+      let matchesCategory = false;
+      if (selectedCategory === "all") {
+        matchesCategory = true;
+      } else {
+        matchesCategory = product.category_id === selectedCategory;
+      }
 
-      // 3. Category check
-      const matchesCategory =
-        selectedCategory === "all" || product.category_id === selectedCategory;
+      // 3. Price check - products are stored in INR, so we divide by 20 to convert to a clean USD value
+      const usdPrice = parseFloat(product.selling_price) / 20;
+      const matchesPrice = usdPrice <= maxPrice;
 
-      // 4. Price check
-      const matchesPrice = parseFloat(product.selling_price) <= maxPrice;
-
-      return matchesSearch && matchesCategory && matchesPrice;
+      return matchesCategory && matchesPrice;
     })
     .sort((a, b) => {
+      const priceA = parseFloat(a.selling_price) / 20;
+      const priceB = parseFloat(b.selling_price) / 20;
+
       if (sortBy === "price-low") {
-        return parseFloat(a.selling_price) - parseFloat(b.selling_price);
+        return priceA - priceB;
       }
       if (sortBy === "price-high") {
-        return parseFloat(b.selling_price) - parseFloat(a.selling_price);
+        return priceB - priceA;
       }
       if (sortBy === "alpha") {
         return a.name.localeCompare(b.name);
       }
-      // Featured / Default
+      // Popularity / Default
       return new Date(b.created_at || 0) - new Date(a.created_at || 0);
     });
 
   return (
     <div className="shop-page animate-fade-in">
       <div className="shop-header">
-        <h1>Cloud Catalog</h1>
-        <p>Explore our premium collection of therapeutic plushies and bedding pads</p>
+        <span className="shop-pre-title">SHOP</span>
+        <h1 className="shop-title">The Full Collection</h1>
+        <p className="shop-product-count">{filteredProducts.length} products</p>
       </div>
 
       <div className="shop-layout">
         {/* Sidebar Filters */}
-        <aside className="shop-sidebar glass-panel">
-          <div className="sidebar-section">
-            <h3><Filter size={18} /> Filters</h3>
-          </div>
-
-          <hr className="sidebar-divider" />
-
+        <aside className="shop-sidebar">
           {/* Categories Selector */}
           <div className="sidebar-section">
-            <h4>Categories</h4>
-            <div className="filter-options-list">
+            <h4 className="sidebar-section-title">Category</h4>
+            <div className="category-links-list">
               <button
-                className={`filter-btn-link ${selectedCategory === "all" ? "active" : ""}`}
-                onClick={() => setSelectedCategory("all")}
+                className={`category-link-btn ${selectedCategory === "all" ? "active" : ""}`}
+                onClick={() => handleCategorySelect("all")}
               >
-                All Softness
+                All Products
               </button>
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  className={`filter-btn-link ${selectedCategory === cat.id ? "active" : ""}`}
-                  onClick={() => setSelectedCategory(cat.id)}
-                >
-                  {cat.name}
-                </button>
-              ))}
+              {categories.map((cat) => {
+                // Map display names to match mockup
+                let displayName = cat.name;
+                if (cat.name === "Lovable Plushies") displayName = "Soft Toys";
+                if (cat.name === "Velvety Blankets") displayName = "Blankets";
+                if (cat.name === "Cozy Pillows") displayName = "Pillows";
+
+                return (
+                  <button
+                    key={cat.id}
+                    className={`category-link-btn ${selectedCategory === cat.id ? "active" : ""}`}
+                    onClick={() => handleCategorySelect(cat.id)}
+                  >
+                    {displayName}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -117,139 +146,92 @@ const Shop = ({ setSelectedProduct }) => {
 
           {/* Price Range Slider */}
           <div className="sidebar-section">
-            <h4>Max Price (₹)</h4>
+            <h4 className="sidebar-section-title">Price</h4>
             <div className="price-slider-group">
               <input
                 type="range"
                 min="0"
-                max="5000"
-                step="50"
+                max="200"
+                step="5"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(parseInt(e.target.value))}
                 className="custom-range-slider"
               />
               <div className="price-display-tags">
-                <span>₹0</span>
-                <strong>₹{maxPrice}</strong>
-                <span>₹5000</span>
+                <span>$0</span>
+                <span>${maxPrice}</span>
               </div>
+            </div>
+          </div>
+
+          <hr className="sidebar-divider" />
+
+          {/* Sort Dropdown */}
+          <div className="sidebar-section">
+            <h4 className="sidebar-section-title">Sort By</h4>
+            <div className="sort-select-wrapper">
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="sort-dropdown-element">
+                <option value="popularity">Popularity</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="alpha">Alphabetical (A-Z)</option>
+              </select>
             </div>
           </div>
         </aside>
 
         {/* Main Product Shelf */}
         <main className="shop-main">
-          {/* Top Bar Controls */}
-          <div className="shop-toolbar glass-panel">
-            {/* Search */}
-            <div className="search-bar-wrapper">
-              <Search className="search-icon" size={18} />
-              <input
-                type="text"
-                placeholder="Search soft clouds..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-
-            {/* Sorting and Views */}
-            <div className="toolbar-controls">
-              <div className="sort-wrapper">
-                <SlidersHorizontal size={16} />
-                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                  <option value="featured">Latest Arrival</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="alpha">Alphabetical (A-Z)</option>
-                </select>
-              </div>
-
-              <div className="view-toggles">
-                <button
-                  className={`view-toggle-btn ${!isListView ? "active" : ""}`}
-                  onClick={() => setIsListView(false)}
-                >
-                  <Grid size={18} />
-                </button>
-                <button
-                  className={`view-toggle-btn ${isListView ? "active" : ""}`}
-                  onClick={() => setIsListView(true)}
-                >
-                  <List size={18} />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Product Grid / List rendering */}
           {loading ? (
             <div className="loader-container">
               <span className="spinner"></span>
               <p>Fetching cozy products...</p>
             </div>
           ) : filteredProducts.length > 0 ? (
-            <div className={isListView ? "products-list-layout" : "products-grid"}>
-              {filteredProducts.map((product) => (
-                <div key={product.id} className="product-card glass-panel">
-                  <div className="product-image-container" onClick={() => handleProductClick(product)}>
-                    <img
-                      src={product.image_url || "https://images.unsplash.com/photo-1559251606-c623743a6d76?q=80&w=600&auto=format&fit=crop"}
-                      alt={product.name}
-                      className="product-img"
-                    />
-                    <div className="card-overlay-actions">
-                      <button className="action-circle-btn" title="View details" onClick={(e) => { e.stopPropagation(); handleProductClick(product); }}>
-                        <Eye size={18} />
-                      </button>
-                      <button className="action-circle-btn" title="Add to Wishlist" onClick={(e) => { e.stopPropagation(); }}>
-                        <Heart size={18} />
-                      </button>
-                    </div>
-                    {parseFloat(product.discount) > 0 && (
-                      <span className="discount-tag">-{parseFloat(product.discount)}% OFF</span>
-                    )}
-                  </div>
+            <div className="products-grid">
+              {filteredProducts.map((product) => {
+                const usdPrice = parseFloat(product.selling_price) / 20;
+                const oldUsdPrice = parseFloat(product.cost_price) / 20;
 
-                  <div className="product-details-content">
-                    <h3 className="product-name" onClick={() => handleProductClick(product)}>{product.name}</h3>
-                    <p className="product-desc-brief">{product.description?.substring(0, 120)}...</p>
-
-                    <div className="stock-level-wrapper">
-                      {product.stock > 0 ? (
-                        <span className="stock-indicator in-stock">● {product.stock} items left</span>
-                      ) : (
-                        <span className="stock-indicator out-stock">● Out of stock</span>
-                      )}
+                return (
+                  <div key={product.id} className="bestseller-product-card" onClick={() => handleProductClick(product)}>
+                    <div className="product-card-image-box">
+                      <img
+                        src={product.image_url || "https://images.unsplash.com/photo-1559251606-c623743a6d76?q=80&w=600&auto=format&fit=crop"}
+                        alt={product.name}
+                        className="product-card-img"
+                      />
+                      <span className={`product-card-badge ${parseFloat(product.discount) > 0 ? "new" : "bestseller"}`}>
+                        {parseFloat(product.discount) > 0 ? "New" : "Bestseller"}
+                      </span>
                     </div>
 
-                    <div className="product-price-row">
-                      <div className="pricing">
-                        <span className="selling-price">₹{parseFloat(product.selling_price).toFixed(2)}</span>
+                    <div className="product-card-meta">
+                      <div className="product-card-rating">
+                        <Star size={14} fill="#f59e0b" color="#f59e0b" />
+                        <span>4.9 (402)</span>
+                      </div>
+                      <h3 className="product-card-title">{product.name}</h3>
+                      <div className="product-card-prices">
+                        <span className="current-price">${usdPrice.toFixed(2)}</span>
                         {parseFloat(product.discount) > 0 && (
-                          <span className="old-price">₹{parseFloat(product.cost_price).toFixed(2)}</span>
+                          <span className="crossed-price">${oldUsdPrice.toFixed(2)}</span>
                         )}
                       </div>
-                      <button 
-                        className="add-cart-mini-btn" 
-                        onClick={() => addToCart(product)}
-                        disabled={product.stock <= 0}
-                      >
-                        <ShoppingCart size={16} /> Add
-                      </button>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="no-products-prompt glass-panel">
               <h3>No matching clouds found</h3>
-              <p>Try clearing some search keywords or adjust your filters slider.</p>
+              <p>Try adjusting your price filter or select a different category.</p>
               <button 
                 className="btn-secondary" 
-                onClick={() => { setSearchQuery(""); setSelectedCategory("all"); setMaxPrice(2500); }}
+                onClick={() => { setSelectedCategory("all"); setMaxPrice(200); }}
               >
-                Reset All Filters
+                Reset Filters
               </button>
             </div>
           )}

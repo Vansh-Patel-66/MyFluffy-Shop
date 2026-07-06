@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { useAuth } from "./AuthContext";
-import { cartAPI, cartItemAPI } from "../utils/api";
+import { cartAPI, cartItemAPI, productAPI } from "../utils/api";
 
 const CartContext = createContext();
 
@@ -42,17 +42,25 @@ export const CartProvider = ({ children }) => {
         setCartId(userCart.id);
 
         // 3. Get all cart items from backend and filter by this cart_id
-        const itemsResponse = await cartItemAPI.getAll();
+        const [itemsResponse, prodsData] = await Promise.all([
+          cartItemAPI.getAll(),
+          productAPI.getAll()
+        ]);
         const allItems = itemsResponse.data || [];
         const userItems = allItems.filter((item) => item.cart_id === userCart.id);
+        const productsList = prodsData || [];
 
         // Map items from backend format to frontend structured format
-        const mappedItems = userItems.map((item) => ({
-          dbId: item.id, // Keep backend record ID to update/delete
-          id: item.product_id, // Product UUID
-          quantity: item.quantity,
-          price: parseFloat(item.price),
-        }));
+        const mappedItems = userItems.map((item) => {
+          const matchingProduct = productsList.find((p) => p.id === item.product_id);
+          return {
+            dbId: item.id, // Keep backend record ID to update/delete
+            id: item.product_id, // Product UUID
+            quantity: item.quantity,
+            price: parseFloat(item.price),
+            product: matchingProduct,
+          };
+        });
 
         setCartItems(mappedItems);
       } catch (err) {
