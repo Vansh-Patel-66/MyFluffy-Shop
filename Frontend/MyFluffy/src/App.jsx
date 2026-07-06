@@ -9,7 +9,7 @@ import Login from "./component/Login/login";
 import Home from "./component/home/home";
 import Shop from "./component/Shop/Shop";
 import ProductDetailsModal from "./component/ProductDetails/ProductDetailsModal";
-import CartDrawer from "./component/Cart/CartDrawer";
+import Cart from "./component/Cart/Cart";
 import Checkout from "./component/Checkout/Checkout";
 import Orders from "./component/Orders/Orders";
 import Contact from "./component/Contact/Contact";
@@ -21,8 +21,8 @@ import "./App.css";
 function AppContent() {
   const { user } = useAuth();
   const [activePage, setActivePage] = useState("home");
-  const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   const handleLoginSuccess = () => {
     setActivePage("home");
@@ -31,7 +31,15 @@ function AppContent() {
   const renderActivePage = () => {
     switch (activePage) {
       case "shop":
-        return <Shop setSelectedProduct={setSelectedProduct} />;
+        return (
+          <Shop
+            setSelectedProduct={setSelectedProduct}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+          />
+        );
+      case "cart":
+        return <Cart setActivePage={setActivePage} />;
       case "contact":
         return <Contact />;
       case "about":
@@ -54,7 +62,6 @@ function AppContent() {
       default:
         return (
           <Home
-            userEmail={user ? user.email : "Guest"}
             setActivePage={setActivePage}
             setSelectedProduct={setSelectedProduct}
           />
@@ -68,24 +75,18 @@ function AppContent() {
       <Navbar
         activePage={activePage}
         setActivePage={setActivePage}
-        onCartToggle={() => setIsCartOpen(!isCartOpen)}
+        setShopCategory={setSelectedCategory}
       />
 
       {/* Main Container */}
-      <main style={{ flex: 1, paddingBottom: "60px" }}>
+      <main style={{ flex: 1 }}>
         {renderActivePage()}
       </main>
-
-      {/* Global Interactive Overlays */}
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        setActivePage={setActivePage}
-      />
 
       <ProductDetailsModal
         product={selectedProduct}
         onClose={() => setSelectedProduct(null)}
+        setActivePage={setActivePage}
       />
 
       <Toast />

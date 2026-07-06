@@ -142,7 +142,7 @@ const Orders = () => {
                   <div style={orderStyles.middleGroup}>
                     <div>
                       <span style={orderStyles.summaryLbl}>Total Price</span>
-                      <strong style={orderStyles.summaryVal}>₹{parseFloat(order.finale_amount).toFixed(2)}</strong>
+                      <strong style={orderStyles.summaryVal}>${(parseFloat(order.finale_amount) / 20).toFixed(2)}</strong>
                     </div>
                   </div>
 
@@ -214,8 +214,8 @@ const Orders = () => {
                               <span style={orderStyles.itemQuantity}>Qty: {item.quantity}</span>
                             </div>
                             <div style={orderStyles.itemPriceCol}>
-                              <strong>₹{(parseFloat(item.price) * item.quantity).toFixed(2)}</strong>
-                              <span style={orderStyles.itemUnitPrice}>₹{parseFloat(item.price).toFixed(2)} each</span>
+                              <strong>${((parseFloat(item.price) / 20) * item.quantity).toFixed(2)}</strong>
+                              <span style={orderStyles.itemUnitPrice}>${(parseFloat(item.price) / 20).toFixed(2)} each</span>
                             </div>
                           </div>
                         );
@@ -232,7 +232,7 @@ const Orders = () => {
                       <div style={orderStyles.invoiceNumbers}>
                         <div style={orderStyles.invoiceRow}>
                           <span>Tax GST (5%)</span>
-                          <span>₹{parseFloat(order.tax_amount).toFixed(2)}</span>
+                          <span>${(parseFloat(order.tax_amount) / 20).toFixed(2)}</span>
                         </div>
                         <div style={orderStyles.invoiceRow}>
                           <span>Delivery Fees</span>
@@ -240,7 +240,7 @@ const Orders = () => {
                         </div>
                         <div style={{ ...orderStyles.invoiceRow, ...orderStyles.grandRow }}>
                           <span>Final Amount Paid</span>
-                          <span>₹{parseFloat(order.finale_amount).toFixed(2)}</span>
+                          <span>${(parseFloat(order.finale_amount) / 20).toFixed(2)}</span>
                         </div>
                       </div>
                     </div>

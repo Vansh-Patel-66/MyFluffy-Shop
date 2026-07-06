@@ -57,12 +57,16 @@ const AdminDashboard = () => {
       setContacts(conts.data || conts || []);
 
       if (anas && anas.length > 0) {
-        setAnalytics(anas[0]);
+        setAnalytics({
+          total_sales: parseFloat(anas[0].total_sales || 0) / 20,
+          total_orders: anas[0].total_orders,
+          total_users: anas[0].total_users,
+        });
       } else {
         // Calculate totals dynamically
-        const totalSales = (ords.data || []).reduce((acc, o) => acc + parseFloat(o.finale_amount), 0);
+        const totalSalesInr = (ords.data || []).reduce((acc, o) => acc + parseFloat(o.finale_amount), 0);
         setAnalytics({
-          total_sales: totalSales,
+          total_sales: totalSalesInr / 20,
           total_orders: (ords.data || []).length,
           total_users: (usrs.data || []).length,
         });
@@ -97,8 +101,8 @@ const AdminDashboard = () => {
     setEditingProduct(p);
     setProdName(p.name);
     setProdDesc(p.description || "");
-    setProdCost(p.cost_price);
-    setProdSelling(p.selling_price);
+    setProdCost(p.cost_price / 20);
+    setProdSelling(p.selling_price / 20);
     setProdDiscount(p.discount || "0");
     setProdStock(p.stock);
     setProdCategoryId(p.category_id || "");
@@ -117,8 +121,8 @@ const AdminDashboard = () => {
     const payload = {
       name: prodName,
       description: prodDesc,
-      cost_price: parseFloat(prodCost || prodSelling),
-      selling_price: parseFloat(prodSelling),
+      cost_price: parseFloat(prodCost || prodSelling) * 20,
+      selling_price: parseFloat(prodSelling) * 20,
       discount: parseFloat(prodDiscount || 0),
       stock: parseInt(prodStock),
       category_id: prodCategoryId || null,
@@ -257,7 +261,7 @@ const AdminDashboard = () => {
                 <div className="m-icon icon-sales"><TrendingUp size={22} /></div>
                 <div>
                   <span>Total Sales Amount</span>
-                  <strong>₹{parseFloat(analytics.total_sales || 0).toFixed(2)}</strong>
+                  <strong>${parseFloat(analytics.total_sales || 0).toFixed(2)}</strong>
                 </div>
               </div>
               <div className="metric-box glass-panel">
@@ -278,35 +282,35 @@ const AdminDashboard = () => {
 
             {/* Custom Bar Chart Visual Graph */}
             <div className="chart-wrapper glass-panel">
-              <h3>Monthly Performance Metrics (Mock)</h3>
+              <h3>Monthly Performance Metrics (USD)</h3>
               <div className="cozy-graph">
                 <div className="graph-bar-row">
                   <div className="bar-cylinder" style={{ height: "65%" }}>
-                    <span className="bar-tooltip">₹32,500</span>
+                    <span className="bar-tooltip">$1,625</span>
                   </div>
                   <span className="bar-month">Jan</span>
                 </div>
                 <div className="graph-bar-row">
                   <div className="bar-cylinder" style={{ height: "45%" }}>
-                    <span className="bar-tooltip">₹22,100</span>
+                    <span className="bar-tooltip">$1,105</span>
                   </div>
                   <span className="bar-month">Feb</span>
                 </div>
                 <div className="graph-bar-row">
                   <div className="bar-cylinder" style={{ height: "85%" }}>
-                    <span className="bar-tooltip">₹45,600</span>
+                    <span className="bar-tooltip">$2,280</span>
                   </div>
                   <span className="bar-month">Mar</span>
                 </div>
                 <div className="graph-bar-row">
                   <div className="bar-cylinder active-cylinder" style={{ height: "95%" }}>
-                    <span className="bar-tooltip">₹56,200</span>
+                    <span className="bar-tooltip">$2,810</span>
                   </div>
                   <span className="bar-month">Apr</span>
                 </div>
                 <div className="graph-bar-row">
                   <div className="bar-cylinder" style={{ height: "70%" }}>
-                    <span className="bar-tooltip">₹38,000</span>
+                    <span className="bar-tooltip">$1,900</span>
                   </div>
                   <span className="bar-month">May</span>
                 </div>
@@ -338,6 +342,9 @@ const AdminDashboard = () => {
                 <tbody>
                   {products.map((p) => {
                     const cat = categories.find((c) => c.id === p.category_id);
+                    const usdPrice = parseFloat(p.selling_price) / 20;
+                    const usdCost = parseFloat(p.cost_price) / 20;
+
                     return (
                       <tr key={p.id}>
                         <td>
@@ -351,8 +358,8 @@ const AdminDashboard = () => {
                         </td>
                         <td>
                           <div className="table-pricing">
-                            <strong>₹{parseFloat(p.selling_price).toFixed(2)}</strong>
-                            <span>Cost: ₹{parseFloat(p.cost_price).toFixed(2)} ({p.discount}% Off)</span>
+                            <strong>${usdPrice.toFixed(2)}</strong>
+                            <span>Cost: ${usdCost.toFixed(2)} ({p.discount}% Off)</span>
                           </div>
                         </td>
                         <td>
@@ -439,40 +446,44 @@ const AdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {orders.map((o) => (
-                    <tr key={o.id}>
-                      <td>
-                        <div style={{ display: "flex", flexDirection: "column" }}>
-                          <strong>#{o.id.substring(0, 8).toUpperCase()}</strong>
-                          <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Date: {new Date(o.created_at).toLocaleDateString()}</span>
-                        </div>
-                      </td>
-                      <td><strong>₹{parseFloat(o.finale_amount).toFixed(2)}</strong></td>
-                      <td>
-                        <select
-                          value={o.payment_status}
-                          className="table-select-badge"
-                          onChange={(e) => handleUpdateOrderStatus(o.id, "payment_status", e.target.value)}
-                        >
-                          <option value="pending">Pending</option>
-                          <option value="paid">Paid</option>
-                          <option value="failed">Failed</option>
-                        </select>
-                      </td>
-                      <td>
-                        <select
-                          value={o.order_status}
-                          className="table-select-badge"
-                          onChange={(e) => handleUpdateOrderStatus(o.id, "order_status", e.target.value)}
-                        >
-                          <option value="pending">Pending</option>
-                          <option value="shipped">Shipped</option>
-                          <option value="delivered">Delivered</option>
-                          <option value="cancelled">Cancelled</option>
-                        </select>
-                      </td>
-                    </tr>
-                  ))}
+                  {orders.map((o) => {
+                    const usdTotal = parseFloat(o.finale_amount) / 20;
+
+                    return (
+                      <tr key={o.id}>
+                        <td>
+                          <div style={{ display: "flex", flexDirection: "column" }}>
+                            <strong>#{o.id.substring(0, 8).toUpperCase()}</strong>
+                            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Date: {new Date(o.created_at).toLocaleDateString()}</span>
+                          </div>
+                        </td>
+                        <td><strong>${usdTotal.toFixed(2)}</strong></td>
+                        <td>
+                          <select
+                            value={o.payment_status}
+                            className="table-select-badge"
+                            onChange={(e) => handleUpdateOrderStatus(o.id, "payment_status", e.target.value)}
+                          >
+                            <option value="pending">Pending</option>
+                            <option value="paid">Paid</option>
+                            <option value="failed">Failed</option>
+                          </select>
+                        </td>
+                        <td>
+                          <select
+                            value={o.order_status}
+                            className="table-select-badge"
+                            onChange={(e) => handleUpdateOrderStatus(o.id, "order_status", e.target.value)}
+                          >
+                            <option value="pending">Pending</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                          </select>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -549,12 +560,12 @@ const AdminDashboard = () => {
 
               <div className="form-row-3">
                 <div className="form-group">
-                  <label>Cost Price (₹)</label>
-                  <input type="number" placeholder="500" value={prodCost} onChange={(e) => setProdCost(e.target.value)} />
+                  <label>Cost Price ($)</label>
+                  <input type="number" placeholder="25" step="0.01" value={prodCost} onChange={(e) => setProdCost(e.target.value)} />
                 </div>
                 <div className="form-group">
-                  <label>Selling Price (₹)</label>
-                  <input type="number" placeholder="400" value={prodSelling} onChange={(e) => setProdSelling(e.target.value)} required />
+                  <label>Selling Price ($)</label>
+                  <input type="number" placeholder="20" step="0.01" value={prodSelling} onChange={(e) => setProdSelling(e.target.value)} required />
                 </div>
                 <div className="form-group">
                   <label>Discount (%)</label>

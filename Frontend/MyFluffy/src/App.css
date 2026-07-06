@@ -2,27 +2,27 @@
 
 :root {
   /* Premium Soft Color Palette */
-  --primary-hue: 235;
-  --primary: hsl(var(--primary-hue), 85%, 65%);
-  --primary-hover: hsl(var(--primary-hue), 85%, 58%);
-  --primary-light: hsl(var(--primary-hue), 85%, 95%);
-  --secondary: hsl(325, 80%, 65%);
-  --secondary-hover: hsl(325, 80%, 58%);
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --primary-light: #eff6ff;
+  --secondary: #f8b46b;
+  --secondary-hover: #f3a863;
+  --secondary-light: #ffedd5;
   
-  --bg-app: hsl(240, 20%, 98%);
-  --bg-card: hsla(0, 0%, 100%, 0.7);
-  --bg-card-hover: hsla(0, 0%, 100%, 0.9);
-  --border-glass: hsla(240, 15%, 90%, 0.6);
+  --bg-app: #f8fafc;
+  --bg-card: hsla(0, 0%, 100%, 0.8);
+  --bg-card-hover: hsla(0, 0%, 100%, 0.95);
+  --border-glass: hsla(210, 40%, 92%, 0.8);
   
-  --text-main: hsl(240, 10%, 15%);
-  --text-muted: hsl(240, 10%, 50%);
-  --text-light: hsl(240, 10%, 98%);
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-light: #f8fafc;
   
   /* System status */
-  --success: hsl(142, 70%, 45%);
-  --warning: hsl(38, 92%, 50%);
-  --danger: hsl(350, 80%, 55%);
-  --info: hsl(195, 85%, 45%);
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #06b6d4;
 
   /* Typography */
   --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -35,14 +35,14 @@
   --radius-xl: 32px;
   --radius-full: 9999px;
 
-  --shadow-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 8px 24px -6px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 16px 48px -12px rgba(0, 0, 0, 0.12);
-  --shadow-primary: 0 8px 24px -4px hsla(var(--primary-hue), 85%, 65%, 0.3);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.03);
+  --shadow-primary: 0 8px 20px -4px rgba(59, 130, 246, 0.2);
   
-  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-bounce: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --transition-bounce: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2);
 }
 
 /* Base resets */
