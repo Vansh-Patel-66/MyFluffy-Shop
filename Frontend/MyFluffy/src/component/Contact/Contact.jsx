@@ -1,150 +1,182 @@
 import React, { useState } from "react";
 import { contactAPI } from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
-import { Mail, Phone, MapPin, Send, MessageSquareCode, CheckCircle, Sparkles } from "lucide-react";
+import { Mail, Phone, MapPin, Send, CheckCircle } from "lucide-react";
+import "../../style/contact.css";
 
 const Contact = () => {
   const { showToast } = useAuth();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [type, setType] = useState("General Support");
-  
+  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !email || !message) {
-      showToast("Please fill all fields", "warning");
+    if (!form.name || !form.email || !form.message) {
+      showToast("Please fill in all required fields", "warning");
       return;
     }
 
     try {
       setLoading(true);
       await contactAPI.submit({
-        name,
-        email,
-        message,
-        type,
+        name: form.name,
+        email: form.email,
+        phone: form.phone || null,
+        message: form.message,
+        type: "General Support",
       });
       setSubmitted(true);
-      showToast("Message sent successfully!", "success");
     } catch (err) {
       console.error(err);
-      showToast("Error sending message", "error");
+      showToast("Something went wrong. Please try again.", "error");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={contactStyles.container} className="animate-fade-in">
-      <div style={contactStyles.header}>
-        <h1>Get in Touch</h1>
-        <p>We'd love to hear from you. Reach out with questions, feedback, or custom requests.</p>
+    <div className="contact-page animate-fade-in">
+
+      {/* ── PAGE HEADER ── */}
+      <div className="contact-header">
+        <span className="contact-pre-title">CONTACT US</span>
+        <h1 className="contact-title">We'd love to hear from you</h1>
+        <p className="contact-subtitle">
+          Have a question, feedback, or a custom request? Our team responds within 12–24 hours.
+        </p>
       </div>
 
-      <div style={contactStyles.grid}>
-        {/* Contact info column */}
-        <div className="glass-panel" style={contactStyles.infoBlock}>
-          <h3>Contact Information</h3>
-          <p style={contactStyles.intro}>Our support team responds within 12-24 hours. Connect with us directly.</p>
+      {/* ── CONTENT GRID ── */}
+      <div className="contact-grid">
 
-          <div style={contactStyles.cardsGrid}>
-            <div style={contactStyles.infoCard}>
-              <Mail size={22} color="var(--primary)" />
+        {/* LEFT: Info panel */}
+        <aside className="contact-info-panel">
+          <h2 className="contact-info-heading">Contact Information</h2>
+          <p className="contact-info-intro">
+            Reach out directly or fill in the form and we'll get back to you.
+          </p>
+
+          <div className="contact-info-list">
+            <div className="contact-info-item">
+              <div className="contact-info-icon">
+                <Mail size={18} color="var(--primary)" />
+              </div>
               <div>
                 <strong>Support Email</strong>
                 <p>hello@myfluffy.com</p>
               </div>
             </div>
-
-            <div style={contactStyles.infoCard}>
-              <Phone size={22} color="var(--secondary)" />
+            <div className="contact-info-item">
+              <div className="contact-info-icon">
+                <Phone size={18} color="var(--primary)" />
+              </div>
               <div>
-                <strong>Customer Care Hotline</strong>
+                <strong>Customer Care</strong>
                 <p>1-800-FLUFFY (358-339)</p>
               </div>
             </div>
-
-            <div style={contactStyles.infoCard}>
-              <MapPin size={22} color="var(--success)" />
+            <div className="contact-info-item">
+              <div className="contact-info-icon">
+                <MapPin size={18} color="var(--primary)" />
+              </div>
               <div>
-                <strong>Headquarters Office</strong>
-                <p>99 Cloud Corner, Level 4, Cottonland, India</p>
+                <strong>Headquarters</strong>
+                <p>99 Cloud Corner, Cottonland, India</p>
               </div>
             </div>
           </div>
 
-          <div style={contactStyles.decorationBlob}>
-            <Sparkles size={24} className="empty-icon" />
-            <span>Cozy Guarantee: 100% Satisfaction or refund.</span>
+          <div className="contact-info-badge">
+            ✦ Cozy Guarantee: 100% Satisfaction or refund.
           </div>
-        </div>
+        </aside>
 
-        {/* Form Column */}
-        <div className="glass-panel" style={contactStyles.formBlock}>
+        {/* RIGHT: Form panel */}
+        <div className="contact-form-panel">
           {!submitted ? (
-            <form onSubmit={handleSubmit} style={contactStyles.form}>
-              <h3><MessageSquareCode size={20} color="var(--primary)" /> Send Us a Message</h3>
+            <form className="contact-form" onSubmit={handleSubmit} noValidate>
+              <h2 className="contact-form-heading">Send us a message</h2>
 
-              <div className="form-group">
-                <label>Your Name</label>
+              <div className="contact-form-row">
+                <div className="contact-field">
+                  <label htmlFor="cf-name">Full Name <span className="required">*</span></label>
+                  <input
+                    id="cf-name"
+                    name="name"
+                    type="text"
+                    placeholder="Jane Doe"
+                    value={form.name}
+                    onChange={handleChange}
+                    disabled={loading}
+                    required
+                  />
+                </div>
+                <div className="contact-field">
+                  <label htmlFor="cf-email">Email Address <span className="required">*</span></label>
+                  <input
+                    id="cf-email"
+                    name="email"
+                    type="email"
+                    placeholder="jane@example.com"
+                    value={form.email}
+                    onChange={handleChange}
+                    disabled={loading}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="contact-field">
+                <label htmlFor="cf-phone">Phone Number <span className="optional">(optional)</span></label>
                 <input
-                  type="text"
-                  placeholder="Jane Doe"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
+                  id="cf-phone"
+                  name="phone"
+                  type="tel"
+                  placeholder="+91 98765 43210"
+                  value={form.phone}
+                  onChange={handleChange}
                   disabled={loading}
                 />
               </div>
 
-              <div className="form-group">
-                <label>Email Address</label>
-                <input
-                  type="email"
-                  placeholder="jane@doe.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={loading}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Inquiry Category</label>
-                <select value={type} onChange={(e) => setType(e.target.value)} disabled={loading}>
-                  <option value="General Support">General Support</option>
-                  <option value="Shipping & Delivery">Shipping & Delivery</option>
-                  <option value="Return / Refund Request">Return / Refund Request</option>
-                  <option value="Bulk Pillow Orders">Bulk Pillow Orders</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Detailed Message</label>
+              <div className="contact-field">
+                <label htmlFor="cf-message">Your Message <span className="required">*</span></label>
                 <textarea
-                  placeholder="How can we help make your life fluffier?"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  rows={4}
-                  required
+                  id="cf-message"
+                  name="message"
+                  placeholder="How can we make your life fluffier? Tell us anything…"
+                  value={form.message}
+                  onChange={handleChange}
+                  rows={5}
                   disabled={loading}
-                ></textarea>
+                  required
+                />
               </div>
 
-              <button type="submit" className="btn-primary" style={contactStyles.submitBtn} disabled={loading}>
-                {loading ? <span className="spinner small-spinner"></span> : <>Send Message <Send size={16} /></>}
+              <button type="submit" className="contact-submit-btn btn-primary" disabled={loading}>
+                {loading
+                  ? <><span className="spinner small-spinner" /> Sending…</>
+                  : <><Send size={16} /> Send Message</>
+                }
               </button>
             </form>
           ) : (
-            <div style={contactStyles.successView} className="animate-fade-in">
-              <CheckCircle size={54} color="var(--success)" />
-              <h2>Message Dispatched!</h2>
-              <p>Thank you for reaching out. We have logged your request and our support specialists are already on it!</p>
-              <button className="btn-secondary" onClick={() => setSubmitted(false)}>
+            <div className="contact-success animate-fade-in">
+              <div className="contact-success-icon">
+                <CheckCircle size={52} color="var(--success)" />
+              </div>
+              <h2>Message sent! 🎉</h2>
+              <p>
+                Thanks for reaching out, <strong>{form.name}</strong>. We've received your message
+                and will reply to <strong>{form.email}</strong> within 12–24 hours.
+              </p>
+              <button
+                className="btn-secondary"
+                onClick={() => { setSubmitted(false); setForm({ name: "", email: "", phone: "", message: "" }); }}
+              >
                 Send another message
               </button>
             </div>
@@ -153,87 +185,6 @@ const Contact = () => {
       </div>
     </div>
   );
-};
-
-const contactStyles = {
-  container: {
-    maxWidth: "1200px",
-    margin: "40px auto",
-    padding: "0 24px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "40px",
-  },
-  header: {
-    textAlign: "center",
-  },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "0.8fr 1.2fr",
-    gap: "32px",
-  },
-  infoBlock: {
-    padding: "40px",
-    borderRadius: "24px !important",
-    display: "flex",
-    flexDirection: "column",
-    gap: "24px",
-    background: "rgba(255, 255, 255, 0.8) !important",
-  },
-  intro: {
-    fontSize: "0.9rem",
-    color: "var(--text-muted)",
-    lineHeight: "1.6",
-  },
-  cardsGrid: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "16px",
-  },
-  infoCard: {
-    display: "flex",
-    alignItems: "center",
-    gap: "16px",
-    padding: "16px",
-    background: "white",
-    border: "1px solid var(--border-glass)",
-    borderRadius: "12px",
-  },
-  decorationBlob: {
-    marginTop: "auto",
-    background: "var(--primary-light)",
-    padding: "16px",
-    borderRadius: "12px",
-    color: "var(--primary)",
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    fontSize: "0.8rem",
-    fontWeight: "700",
-  },
-  formBlock: {
-    padding: "40px",
-    borderRadius: "24px !important",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "16px",
-  },
-  submitBtn: {
-    alignSelf: "flex-start",
-    marginTop: "8px",
-  },
-  successView: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    textAlign: "center",
-    padding: "60px 24px",
-    gap: "16px",
-    color: "var(--text-muted)",
-  },
 };
 
 export default Contact;
