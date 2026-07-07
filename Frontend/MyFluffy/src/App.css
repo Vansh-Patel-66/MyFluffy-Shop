@@ -264,3 +264,22 @@ a {
 .badge-warning { background: hsl(38, 92%, 90%); color: var(--warning); }
 .badge-danger { background: hsl(350, 80%, 90%); color: var(--danger); }
 .badge-info { background: hsl(195, 85%, 90%); color: var(--info); }
+
+/* Global Product Catalog Grid Layout */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px 24px;
+}
+
+@media (max-width: 992px) {
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
+}

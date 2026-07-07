@@ -22,19 +22,21 @@ const Signup = ({ setActivePage }) => {
     }
 
     try {
-      setLoading(false);
+      setLoading(true);
       const res = await authAPI.register(email, password);
       showToast(res.message || "Account created successfully! Please log in.", "success");
       setActivePage("login");
     } catch (err) {
       console.error(err);
       showToast(err.response?.data?.message || "Registration failed", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="login-page-wrapper animate-fade-in">
-      <div className="login-card-container glass-panel">
+      <div className="login-card-container">
         <h1 className="login-card-title">Create your account</h1>
         <p className="login-card-subtitle">Join our cozy community.</p>
 

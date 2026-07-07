@@ -19,7 +19,7 @@ const Login = ({ onLoginSuccess, setActivePage }) => {
 
   return (
     <div className="login-page-wrapper animate-fade-in">
-      <div className="login-card-container glass-panel">
+      <div className="login-card-container">
         <h1 className="login-card-title">Welcome back</h1>
         <p className="login-card-subtitle">Sign in to your MyFluffy account.</p>
 
@@ -59,13 +59,6 @@ const Login = ({ onLoginSuccess, setActivePage }) => {
             Sign up
           </button>
         </p>
-
-        <div className="admin-access-box">
-          <p className="admin-access-title">Try admin access:</p>
-          <p className="admin-access-credentials">
-            Email: <strong>admin@myfluffy.shop</strong> · Password: <strong>admin123</strong>
-          </p>
-        </div>
       </div>
     </div>
   );

@@ -58,7 +58,7 @@
   border: none;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
   padding: 6px 12px;
   cursor: pointer;
@@ -72,7 +72,7 @@
 .nav-link-btn.active {
   background: transparent;
   color: var(--primary);
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .nav-actions {
@@ -253,6 +253,47 @@
 @keyframes slideDown {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Guest Dropdown Menu */
+.profile-dropdown.guest-dropdown-menu {
+  background: white;
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  transition: none; /* Disable any hover transition */
+}
+
+/* Explicitly disable hover effect on the guest dropdown container */
+.profile-dropdown.guest-dropdown-menu:hover {
+  transform: none !important;
+  box-shadow: var(--shadow-md) !important;
+  border-color: var(--border-glass) !important;
+  background: white !important;
+}
+
+/* Guest Dropdown Items */
+.guest-dropdown-item {
+  background: transparent;
+  border: none;
+  text-align: left;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem; /* smaller size */
+  font-weight: 400; /* remove bold effect */
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  width: 100%;
+  transition: var(--transition-smooth);
+}
+
+.guest-dropdown-item:hover {
+  background: var(--primary-light);
+  color: var(--primary);
 }
 
 @media (max-width: 768px) {

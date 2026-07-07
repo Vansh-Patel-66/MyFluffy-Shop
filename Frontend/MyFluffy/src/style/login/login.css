@@ -3,35 +3,37 @@
   align-items: center;
   justify-content: center;
   min-height: 80vh;
-  padding: 40px 20px;
+  padding: 80px 20px;
 }
 
 .login-card-container {
   width: 100%;
-  max-width: 440px;
+  max-width: 400px;
   background: white !important;
   border: 1px solid var(--border-glass);
-  box-shadow: var(--shadow-lg);
-  border-radius: var(--radius-lg) !important;
-  padding: 40px;
+  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.05);
+  border-radius: 32px !important;
+  padding: 48px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: stretch;
+  text-align: left;
 }
 
 .login-card-title {
   font-family: var(--font-display);
-  font-size: 2rem;
+  font-size: 2.25rem;
   font-weight: 800;
   color: var(--text-main);
   margin-bottom: 8px;
+  letter-spacing: -0.03em;
 }
 
 .login-card-subtitle {
   font-size: 0.95rem;
   color: var(--text-muted);
   margin-bottom: 32px;
+  font-weight: 400;
 }
 
 .login-form-element {
@@ -49,26 +51,27 @@
 
 .login-input-field {
   width: 100%;
-  padding: 14px 20px;
-  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  border-radius: 12px;
   border: 1px solid transparent;
-  background-color: #f1f5f9;
+  background-color: #f8fafc;
   color: var(--text-main);
   outline: none;
   font-size: 0.95rem;
+  font-family: var(--font-body);
   transition: var(--transition-smooth);
 }
 
 .login-input-field:focus {
   background-color: white;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
 }
 
 .login-submit-btn {
   width: 100%;
-  padding: 14px 24px;
-  border-radius: var(--radius-full);
+  padding: 16px 24px;
+  border-radius: 12px;
   background: var(--secondary) !important;
   color: #0f172a !important;
   font-family: var(--font-display);
@@ -76,7 +79,6 @@
   font-size: 1rem;
   cursor: pointer;
   border: none;
-  box-shadow: var(--shadow-sm);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -87,56 +89,33 @@
 .login-submit-btn:hover {
   transform: translateY(-2px);
   background: var(--secondary-hover) !important;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 20px rgba(248, 180, 107, 0.25);
+}
+
+.login-submit-btn:active {
+  transform: translateY(1px);
 }
 
 .login-footer-redirect {
   margin-top: 24px;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: var(--text-muted);
+  text-align: center;
 }
 
 .redirect-link {
   background: transparent;
   border: none;
   color: var(--primary);
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   padding: 0;
+  margin-left: 4px;
   transition: var(--transition-smooth);
 }
 
 .redirect-link:hover {
   color: var(--primary-hover);
   text-decoration: underline;
-}
-
-/* Try admin access box */
-.admin-access-box {
-  margin-top: 32px;
-  width: 100%;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: var(--radius-md);
-  padding: 16px;
-  text-align: left;
-}
-
-.admin-access-title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: #1e40af;
-  margin-bottom: 4px;
-}
-
-.admin-access-credentials {
-  font-size: 0.8rem;
-  color: #1e3a8a;
-  line-height: 1.4;
-}
-
-.admin-access-credentials strong {
-  font-weight: 700;
 }
