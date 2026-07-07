@@ -22,7 +22,7 @@ const Navbar = ({ activePage, setActivePage, setShopCategory }) => {
   };
 
   return (
-    <nav className="main-navbar glass-panel">
+    <nav className="main-navbar">
       <div className="nav-container">
         {/* Mobile Menu Toggle */}
         <button className="mobile-toggle" onClick={() => setShowMobileMenu(!showMobileMenu)}>
@@ -118,11 +118,27 @@ const Navbar = ({ activePage, setActivePage, setShopCategory }) => {
               )}
             </div>
           ) : (
-            <button className="profile-trigger-btn" onClick={() => handleNavClick("login")}>
-              <div className="avatar-circle-outline">
-                <User size={20} />
-              </div>
-            </button>
+            <div className="profile-dropdown-container">
+              <button 
+                className="profile-trigger-btn"
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+              >
+                <div className="avatar-circle-outline">
+                  <User size={20} />
+                </div>
+              </button>
+              
+              {showProfileMenu && (
+                <div className="profile-dropdown guest-dropdown-menu" style={{ width: "180px" }}>
+                  <button className="guest-dropdown-item" onClick={() => handleNavClick("login")}>
+                    Log in
+                  </button>
+                  <button className="guest-dropdown-item" onClick={() => handleNavClick("signup")}>
+                    Create account
+                  </button>
+                </div>
+              )}
+            </div>
           )}
 
           {/* Shopping Cart Trigger */}

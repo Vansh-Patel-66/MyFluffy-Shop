@@ -6,6 +6,7 @@ import { CartProvider } from "./context/CartContext";
 import Navbar from "./component/Navbar/Navbar";
 import Toast from "./component/Toast/Toast";
 import Login from "./component/Login/login";
+import Signup from "./component/Login/signup";
 import Home from "./component/home/home";
 import Shop from "./component/Shop/Shop";
 import ProductDetailsModal from "./component/ProductDetails/ProductDetailsModal";
@@ -15,6 +16,7 @@ import Orders from "./component/Orders/Orders";
 import Contact from "./component/Contact/Contact";
 import AboutUs from "./component/AboutUs/AboutUs";
 import AdminDashboard from "./component/Admin/AdminDashboard";
+import Footer from "./component/Footer/Footer";
 
 import "./App.css";
 
@@ -52,18 +54,24 @@ function AppContent() {
         if (user && user.role === "admin") {
           return <AdminDashboard />;
         }
-        return <Home setActivePage={setActivePage} setSelectedProduct={setSelectedProduct} />;
+        return <Home setActivePage={setActivePage} setSelectedProduct={setSelectedProduct} setSelectedCategory={setSelectedCategory} />;
       case "login":
         if (user) {
-          return <Home setActivePage={setActivePage} setSelectedProduct={setSelectedProduct} />;
+          return <Home setActivePage={setActivePage} setSelectedProduct={setSelectedProduct} setSelectedCategory={setSelectedCategory} />;
         }
-        return <Login onLoginSuccess={handleLoginSuccess} />;
+        return <Login onLoginSuccess={handleLoginSuccess} setActivePage={setActivePage} />;
+      case "signup":
+        if (user) {
+          return <Home setActivePage={setActivePage} setSelectedProduct={setSelectedProduct} setSelectedCategory={setSelectedCategory} />;
+        }
+        return <Signup setActivePage={setActivePage} />;
       case "home":
       default:
         return (
           <Home
             setActivePage={setActivePage}
             setSelectedProduct={setSelectedProduct}
+            setSelectedCategory={setSelectedCategory}
           />
         );
     }
@@ -82,6 +90,9 @@ function AppContent() {
       <main style={{ flex: 1 }}>
         {renderActivePage()}
       </main>
+
+      {/* Render Reusable Footer globally (except in Admin Portal) */}
+      {activePage !== "admin" && <Footer setActivePage={setActivePage} />}
 
       <ProductDetailsModal
         product={selectedProduct}

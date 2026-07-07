@@ -1,146 +1,104 @@
 import React from "react";
-import { Heart, Sparkles, ShieldCheck, Smile, HelpCircle, ArrowRight } from "lucide-react";
+import { Heart, Leaf, Sparkles, Users, ArrowRight } from "lucide-react";
 import "../../style/about.css";
 
 const AboutUs = ({ setActivePage }) => {
   return (
-    <div className="about-container animate-fade-in">
-      {/* Hero Banner */}
-      <section className="about-hero glass-panel">
-        <div className="about-hero-content">
-          <div className="about-sparkle-badge">
-            <Sparkles size={16} /> <span>Handcrafted with Love</span>
-          </div>
-          <h1>Crafting Comfort for Your Happy Place</h1>
-          <p className="about-hero-subtitle">
-            Born from a simple dream to build the ultimate soft experience, we craft cuddle-worthy companions that make everyday life feel a little lighter.
-          </p>
-        </div>
-        <div className="about-hero-visual">
-          <div className="cloud-bubble large">☁️</div>
-          <div className="cloud-bubble medium">☁️</div>
-          <div className="cloud-bubble small">☁️</div>
-        </div>
-      </section>
+    <div className="about-page animate-fade-in">
 
-      {/* Our Story & Mission */}
-      <section className="about-story-section">
-        <div className="story-grid">
-          <div className="story-image-card glass-panel">
-            <img 
-              src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=600&auto=format&fit=crop" 
-              alt="Soft fabrics texture close up" 
-              className="story-img"
-            />
-            <div className="story-floating-badge">
-              <strong>Est. 2026</strong>
-            </div>
-          </div>
-          <div className="story-content">
-            <span className="about-pre">OUR JOURNEY</span>
-            <h2>How It All Started</h2>
-            <p>
-              MyFluffy was founded after searching endlessly for the perfect fluffy pillow that wouldn't flatten after a few weeks. What started as an experiment in a tiny workspace using hand-combed organic cotton and premium hypoallergenic microfibers quickly turned into a passion.
-            </p>
-            <p>
-              We realized that softness isn't just a physical texture — it represents a feeling of safety, comfort, and relief at the end of a long day. Today, we are proud to deliver that same handcrafted comfort to thousands of homes across the nation.
-            </p>
-            <div className="story-features">
-              <div className="story-feat-item">
-                <Heart size={18} className="feat-icon-heart" />
-                <span>Made for side, back, and stomach sleepers alike</span>
-              </div>
-              <div className="story-feat-item">
-                <ShieldCheck size={18} className="feat-icon-shield" />
-                <span>Fully certified hypoallergenic materials</span>
-              </div>
-            </div>
-          </div>
+      {/* ── HERO ── */}
+      <section className="about-hero-section">
+        <span className="about-section-pre">OUR STORY</span>
+        <h1 className="about-hero-title">
+          Comfort, crafted with <span className="about-hero-accent">care.</span>
+        </h1>
+        <p className="about-hero-desc">
+          MyFluffy Shop was born from a simple idea: everyone deserves a corner of the
+          world that feels warm, safe, and impossibly soft. So we set out to make it.
+        </p>
+        <div className="about-hero-image-wrap">
+          <img
+            src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=1400&auto=format&fit=crop"
+            alt="Cozy pillows on a bed"
+            className="about-hero-img"
+          />
         </div>
       </section>
 
-      {/* Core Values Grid */}
-      <section className="about-values-section">
-        <div className="section-header-centered">
-          <span className="about-pre">WHAT DRIVES US</span>
-          <h2>Our Core Comfort Values</h2>
-          <p>We believe in high-quality items that last, keeping your comfort and the planet in mind.</p>
+      {/* ── MISSION ── */}
+      <section className="about-mission-section">
+        <div className="about-mission-left">
+          <span className="about-section-pre">MISSION</span>
+          <h2 className="about-mission-title">
+            Bringing comfort, warmth, and joy — one plushie at a time.
+          </h2>
         </div>
-
-        <div className="values-grid">
-          <div className="value-card glass-panel">
-            <div className="value-icon-wrapper cream">
-              <Sparkles size={24} color="var(--primary)" />
-            </div>
-            <h3>Cloud-Like Softness</h3>
-            <p>We source only high-density combed polyester fill. Each fibers is treated to stay bounce-resilient and fluffy month after month.</p>
-          </div>
-
-          <div className="value-card glass-panel">
-            <div className="value-icon-wrapper green">
-              <ShieldCheck size={24} color="var(--success)" />
-            </div>
-            <h3>Hypoallergenic & Safe</h3>
-            <p>Absolutely zero harmful dyes, chemical softeners, or irritants. Fully safe for kids, toddlers, and sensitive skin sleepers.</p>
-          </div>
-
-          <div className="value-card glass-panel">
-            <div className="value-icon-wrapper pink">
-              <Heart size={24} color="var(--secondary)" />
-            </div>
-            <h3>100% Ethical Crafting</h3>
-            <p>We believe in fair wages, safe workspaces, and minimizing production waste. Every offcut fabric is recycled into plushie stuffing.</p>
-          </div>
-
-          <div className="value-card glass-panel">
-            <div className="value-icon-wrapper blue">
-              <Smile size={24} color="var(--primary)" />
-            </div>
-            <h3>Cozy Satisfaction</h3>
-            <p>Our 100-night test guarantee ensures you have plenty of time to cuddle with your purchase. Not satisfied? Return it with ease.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Mascot/Team Showcase */}
-      <section className="about-mascots-section glass-panel">
-        <div className="mascot-text">
-          <h2>Meet the Fluffy Family</h2>
+        <div className="about-mission-right">
           <p>
-            Our signature product characters aren't just shapes — they are lovable companions designed with unique personalities.
+            Every product in our shop is hand-selected for a reason: it made us
+            smile, feel calm, or want to curl up on the couch. We work with small
+            workshops and independent makers who care as much about the
+            tiniest stitch as we do.
           </p>
-          <div className="mascot-list">
-            <div className="mascot-item">
-              <span className="mascot-emoji">☁️</span>
-              <div>
-                <strong>Cuddle Cloud</strong>
-                <p>Gentle and supporting. Always there to support your neck and head during deep sleeps.</p>
-              </div>
-            </div>
-            <div className="mascot-item">
-              <span className="mascot-emoji">🐱</span>
-              <div>
-                <strong>Marshmallow Kitty</strong>
-                <p>Round, squishy, and sweet. Likes warm sunlight and keeps your lap cozy on study days.</p>
-              </div>
-            </div>
-            <div className="mascot-item">
-              <span className="mascot-emoji">🐰</span>
-              <div>
-                <strong>Floppy Bunny</strong>
-                <p>Playful and super fuzzy. Has extra long ears perfect for squeezing during scary movies.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="mascot-cta">
-          <h3>Ready to discover the fluff?</h3>
-          <p>Join the thousands of happy sleepers who have upgraded their relaxation game.</p>
-          <button className="btn-primary" onClick={() => setActivePage("shop")}>
-            Explore the Catalog <ArrowRight size={18} />
-          </button>
+          <p>
+            Whether it's a plush companion for a kiddo's bedroom, a chunky knit
+            throw for movie nights, or the pillow you didn't know you needed —
+            we hope our little corner of the internet brings a big bit of comfort to
+            yours.
+          </p>
         </div>
       </section>
+
+      {/* ── WHY CHOOSE US ── */}
+      <section className="about-why-section">
+        <div className="about-why-header">
+          <span className="about-section-pre">WHY CHOOSE US</span>
+          <h2 className="about-why-title">Softer standards, softer products</h2>
+        </div>
+        <div className="about-why-grid">
+          <div className="about-why-card">
+            <div className="about-why-icon">
+              <Heart size={22} color="var(--primary)" />
+            </div>
+            <h3>Made with Love</h3>
+            <p>Every stitch by hands that care. Our makers are partners, not just suppliers.</p>
+          </div>
+          <div className="about-why-card">
+            <div className="about-why-icon">
+              <Leaf size={22} color="var(--success)" />
+            </div>
+            <h3>Responsible Materials</h3>
+            <p>Responsible materials, better choices. No harmful dyes, no shortcuts.</p>
+          </div>
+          <div className="about-why-card">
+            <div className="about-why-icon">
+              <Sparkles size={22} color="#f59e0b" />
+            </div>
+            <h3>Tested by Cuddlers</h3>
+            <p>Tested by the pickiest cuddlers. Every product earns its place.</p>
+          </div>
+          <div className="about-why-card">
+            <div className="about-why-icon">
+              <Users size={22} color="#8b5cf6" />
+            </div>
+            <h3>Loved by 10k+ Homes</h3>
+            <p>Rated 4.9/5 across 3,000+ reviews. Our community speaks for us.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
+      <section className="about-cta-section">
+        <h2 className="about-cta-title">Ready to find your perfect cozy companion?</h2>
+        <p className="about-cta-desc">
+          Browse our curated collection of plushies, blankets, and pillows — each one
+          made to bring a little more comfort into your day.
+        </p>
+        <button className="btn-primary about-cta-btn" onClick={() => setActivePage("shop")}>
+          Shop the Collection <ArrowRight size={18} />
+        </button>
+      </section>
+
     </div>
   );
 };
