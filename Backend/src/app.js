@@ -9,6 +9,11 @@ import cronJobs from "./utils/cronJobs.js";
 import logger from "./utils/logger.js";
 import { Server } from "socket.io";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Catch uncaught exceptions before they crash the process silently
 process.on("uncaughtException", (err) => {
@@ -30,6 +35,7 @@ import contactUsRoutes from "./routes/admin/contactUs.routes.js";
 import footerRoutes from "./routes/website/footer.routes.js";
 import analyticsRoutes from "./routes/admin/analytics.routes.js";
 import roleRoutes from "./routes/admin/role.routes.js";
+import uploadRoutes from "./routes/admin/upload.routes.js";
 
 const app = express();
 
@@ -44,7 +50,9 @@ if (process.env.NODE_ENV !== "test") {
 }
 
 // Middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+}));
 app.use(cors({
   origin: process.env.FRONTEND_URL || "*",
   credentials: true,
@@ -58,6 +66,9 @@ const limiter = rateLimit({
 app.use(limiter);
 
 app.use(express.json());
+
+// Serve static files from the public directory
+app.use("/public", express.static(path.join(__dirname, "../public")));
 
 const swaggerOptions = {
   definition: {
@@ -103,6 +114,7 @@ app.use("/api/contact-us", contactUsRoutes);
 app.use("/api/footer", footerRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/role", roleRoutes);
+app.use("/api/upload", uploadRoutes);
 
 // Global Error Handler Middleware
 app.use((err, req, res, next) => {

@@ -1,6 +1,8 @@
 import Product from '../../models/product.model.js';
 import ProductImage from '../../models/productImage.model.js';
 import Category from '../../models/categories.model.js';
+import CartItem from '../../models/cartItem.model.js';
+import OrderItem from '../../models/orderItem.model.js';
 import slugify from 'slugify';
 
 export const createProduct = async (req, res) => {
@@ -101,6 +103,9 @@ export const updateProduct = async (req, res) => {
 
 export const deleteProduct = async (req, res) => {
   try {
+    await ProductImage.destroy({ where: { product_id: req.params.id } });
+    await CartItem.destroy({ where: { product_id: req.params.id } });
+    await OrderItem.destroy({ where: { product_id: req.params.id } });
     const deleted = await Product.destroy({ where: { id: req.params.id } });
     if (deleted) res.status(204).send();
     else res.status(404).json({ error: 'Record not found' });

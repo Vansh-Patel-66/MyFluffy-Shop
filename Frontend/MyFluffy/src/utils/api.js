@@ -2,6 +2,20 @@ import axios from "axios";
 
 const API_BASE_URL = "http://localhost:3000/api";
 
+export const getImageUrl = (url) => {
+  if (!url) return null;
+  // If the DB stored the old hardcoded absolute URL, rewrite it to use the current origin
+  if (url.startsWith("http://localhost:3000")) {
+    return API_BASE_URL.replace("/api", "") + url.replace("http://localhost:3000", "");
+  }
+  // If it's a relative URL, prepend the backend host
+  if (url.startsWith("/public")) {
+    return API_BASE_URL.replace("/api", "") + url;
+  }
+  // Otherwise (e.g. Unsplash, Cloudinary), return as is
+  return url;
+};
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -212,6 +226,21 @@ export const analyticsAPI = {
   get: async () => {
     const response = await api.get("/analytics");
     return response.data; // List of records
+  },
+};
+
+export const uploadAPI = {
+  uploadImage: async (file) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    
+    // Use the api instance but override headers for form data
+    const response = await api.post("/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
   },
 };
 
