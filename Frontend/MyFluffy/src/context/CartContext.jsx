@@ -90,14 +90,21 @@ export const CartProvider = ({ children }) => {
   const addToCart = async (product, qty = 1) => {
     try {
       const existingItem = cartItems.find((item) => item.id === product.id);
+      const newQty = existingItem ? existingItem.quantity + qty : qty;
+
+      if (newQty > product.stock) {
+        showToast("Cannot add more than available in stock.", "warning");
+        return;
+      }
+
+      const finalPrice = product.selling_price * (1 - (product.discount || 0) / 100);
 
       if (user && cartId) {
         if (existingItem) {
           // Update existing item in backend
-          const newQty = existingItem.quantity + qty;
           const updatedItem = await cartItemAPI.update(existingItem.dbId, {
             quantity: newQty,
-            price: product.selling_price,
+            price: finalPrice,
           });
           setCartItems((prev) =>
             prev.map((item) =>
@@ -112,7 +119,7 @@ export const CartProvider = ({ children }) => {
             cart_id: cartId,
             product_id: product.id,
             quantity: qty,
-            price: product.selling_price,
+            price: finalPrice,
           });
           setCartItems((prev) => [
             ...prev,
@@ -120,7 +127,7 @@ export const CartProvider = ({ children }) => {
               dbId: newItem.id,
               id: product.id,
               quantity: qty,
-              price: parseFloat(product.selling_price),
+              price: parseFloat(finalPrice),
               product,
             },
           ]);
@@ -141,7 +148,7 @@ export const CartProvider = ({ children }) => {
             {
               id: product.id,
               quantity: qty,
-              price: parseFloat(product.selling_price),
+              price: parseFloat(finalPrice),
               product,
             },
           ]);
@@ -156,7 +163,7 @@ export const CartProvider = ({ children }) => {
         if (item) {
           return prev.map((i) => (i.id === product.id ? { ...i, quantity: i.quantity + qty } : i));
         }
-        return [...prev, { id: product.id, quantity: qty, price: parseFloat(product.selling_price), product }];
+        return [...prev, { id: product.id, quantity: qty, price: parseFloat(finalPrice), product }];
       });
       showToast(`${product.name} added to local cart`, "success");
     }
@@ -169,6 +176,11 @@ export const CartProvider = ({ children }) => {
     const newQty = item.quantity + amount;
     if (newQty <= 0) {
       removeFromCart(productId);
+      return;
+    }
+
+    if (newQty > (item.product?.stock || 0)) {
+      showToast("Cannot add more than available in stock.", "warning");
       return;
     }
 

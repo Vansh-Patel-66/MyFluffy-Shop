@@ -2,6 +2,7 @@ import Joi from "joi";
 
 export const createProductSchema = Joi.object({
   name: Joi.string().required(),
+  slug: Joi.string().optional(),
   description: Joi.string().optional(),
   cost_price: Joi.number().optional(),
   selling_price: Joi.number().optional(),
@@ -9,11 +10,21 @@ export const createProductSchema = Joi.object({
   stock: Joi.number().integer().optional(),
   category_id: Joi.string().uuid().optional(),
   image_url: Joi.string().uri().optional(),
+  image_urls: Joi.array().items(Joi.string().uri()).optional(),
+  badge: Joi.string().optional(),
+  rating: Joi.number().optional(),
+  number_of_ratings: Joi.number().integer().optional(),
+  sizes: Joi.string().optional(),
+  colors: Joi.string().optional(),
+  material: Joi.string().optional(),
+  care: Joi.string().optional(),
+  featured_on_homepage: Joi.boolean().optional(),
   is_active: Joi.boolean().optional(),
 });
 
 export const updateProductSchema = Joi.object({
   name: Joi.string().optional(),
+  slug: Joi.string().optional(),
   description: Joi.string().optional(),
   cost_price: Joi.number().optional(),
   selling_price: Joi.number().optional(),
@@ -21,5 +32,14 @@ export const updateProductSchema = Joi.object({
   stock: Joi.number().integer().optional(),
   category_id: Joi.string().uuid().optional(),
   image_url: Joi.string().uri().optional(),
+  image_urls: Joi.array().items(Joi.string().uri()).optional(),
+  badge: Joi.string().optional(),
+  rating: Joi.number().optional(),
+  number_of_ratings: Joi.number().integer().optional(),
+  sizes: Joi.string().optional(),
+  colors: Joi.string().optional(),
+  material: Joi.string().optional(),
+  care: Joi.string().optional(),
+  featured_on_homepage: Joi.boolean().optional(),
   is_active: Joi.boolean().optional(),
 });

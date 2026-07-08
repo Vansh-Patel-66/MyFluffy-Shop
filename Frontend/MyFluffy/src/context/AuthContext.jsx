@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
         setToken(res.token);
         setUser(res.data);
         showToast("Logged in successfully!", "success");
-        return { success: true };
+        return { success: true, user: res.data };
       } else {
         showToast(res.message || "Login failed", "error");
         return { success: false, message: res.message };

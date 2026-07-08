@@ -13,7 +13,7 @@ const Login = ({ onLoginSuccess, setActivePage }) => {
 
     const res = await login(email, password);
     if (res.success && onLoginSuccess) {
-      onLoginSuccess();
+      onLoginSuccess(res.user);
     }
   };
 
