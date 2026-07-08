@@ -26,8 +26,12 @@ function AppContent() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  const handleLoginSuccess = () => {
-    setActivePage("home");
+  const handleLoginSuccess = (loggedInUser) => {
+    if (loggedInUser && loggedInUser.role === "admin") {
+      setActivePage("admin");
+    } else {
+      setActivePage("home");
+    }
   };
 
   const renderActivePage = () => {

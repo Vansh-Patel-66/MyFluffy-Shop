@@ -1,8 +1,17 @@
 import OrderItem from '../../models/orderItem.model.js';
+import Product from '../../models/product.model.js';
 
 export const createOrderItem = async (req, res) => {
   try {
     const newRecord = await OrderItem.create(req.body);
+    
+    if (req.body.product_id && req.body.quantity) {
+      const product = await Product.findByPk(req.body.product_id);
+      if (product && product.stock >= req.body.quantity) {
+        await product.update({ stock: product.stock - req.body.quantity });
+      }
+    }
+
     res.status(201).json(newRecord);
   } catch (error) {
     res.status(500).json({ error: error.message });

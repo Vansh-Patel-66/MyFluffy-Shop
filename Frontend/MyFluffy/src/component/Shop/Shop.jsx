@@ -78,15 +78,16 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
         matchesCategory = product.category_id === selectedCategory;
       }
 
-      // 3. Price check - products are stored in INR, so we divide by 20 to convert to a clean USD value
-      const usdPrice = parseFloat(product.selling_price) / 20;
+      // 3. Price check
+      const originalUsdPrice = parseFloat(product.selling_price) / 20;
+      const usdPrice = originalUsdPrice * (1 - (parseFloat(product.discount) || 0) / 100);
       const matchesPrice = usdPrice <= maxPrice;
 
       return matchesCategory && matchesPrice;
     })
     .sort((a, b) => {
-      const priceA = parseFloat(a.selling_price) / 20;
-      const priceB = parseFloat(b.selling_price) / 20;
+      const priceA = (parseFloat(a.selling_price) / 20) * (1 - (parseFloat(a.discount) || 0) / 100);
+      const priceB = (parseFloat(b.selling_price) / 20) * (1 - (parseFloat(b.discount) || 0) / 100);
 
       if (sortBy === "price-low") {
         return priceA - priceB;
@@ -190,8 +191,10 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
           ) : filteredProducts.length > 0 ? (
             <div className="products-grid">
               {filteredProducts.map((product) => {
-                const usdPrice = parseFloat(product.selling_price) / 20;
+                const originalUsdPrice = parseFloat(product.selling_price) / 20;
+                const usdPrice = originalUsdPrice * (1 - (parseFloat(product.discount) || 0) / 100);
                 const oldUsdPrice = parseFloat(product.cost_price) / 20;
+                const totalDiscountPercent = oldUsdPrice > usdPrice ? Math.round(((oldUsdPrice - usdPrice) / oldUsdPrice) * 100) : 0;
 
                 return (
                   <div key={product.id} className="bestseller-product-card" onClick={() => handleProductClick(product)}>
@@ -201,8 +204,8 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
                         alt={product.name}
                         className="product-card-img"
                       />
-                      <span className={`product-card-badge ${parseFloat(product.discount) > 0 ? "new" : "bestseller"}`}>
-                        {parseFloat(product.discount) > 0 ? "New" : "Bestseller"}
+                      <span className={`product-card-badge ${totalDiscountPercent > 0 ? "new" : "bestseller"}`}>
+                        {totalDiscountPercent > 0 ? `${totalDiscountPercent}% OFF` : "Bestseller"}
                       </span>
                     </div>
 
@@ -214,7 +217,7 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
                       <h3 className="product-card-title">{product.name}</h3>
                       <div className="product-card-prices">
                         <span className="current-price">${usdPrice.toFixed(2)}</span>
-                        {parseFloat(product.discount) > 0 && (
+                        {oldUsdPrice > usdPrice && (
                           <span className="crossed-price">${oldUsdPrice.toFixed(2)}</span>
                         )}
                       </div>

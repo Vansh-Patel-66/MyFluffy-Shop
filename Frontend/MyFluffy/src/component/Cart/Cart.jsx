@@ -78,6 +78,7 @@ const Cart = ({ setActivePage }) => {
                         <button
                           className="qty-picker-btn"
                           onClick={() => updateQuantity(item.id, 1)}
+                          disabled={item.quantity >= (item.product?.stock || 0)}
                         >
                           <Plus size={14} />
                         </button>

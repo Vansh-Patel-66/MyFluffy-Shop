@@ -18,9 +18,11 @@ const ProductDetailsModal = ({ product, onClose }) => {
 
   if (!product) return null;
 
-  const usdPrice = parseFloat(product.selling_price) / 20;
+  const originalUsdPrice = parseFloat(product.selling_price) / 20;
+  const usdPrice = originalUsdPrice * (1 - (parseFloat(product.discount) || 0) / 100);
   const oldUsdPrice = parseFloat(product.cost_price) / 20;
-  const saveAmount = oldUsdPrice - usdPrice;
+  const saveAmount = oldUsdPrice > usdPrice ? oldUsdPrice - usdPrice : 0;
+  const totalDiscountPercent = oldUsdPrice > usdPrice ? Math.round(((oldUsdPrice - usdPrice) / oldUsdPrice) * 100) : 0;
 
   const handleQtyChange = (val) => {
     const nextQty = quantity + val;
@@ -67,8 +69,8 @@ const ProductDetailsModal = ({ product, onClose }) => {
                 alt={product.name}
                 style={modalStyles.image}
               />
-              <span className="product-card-badge bestseller" style={modalStyles.discountTag}>
-                Bestseller
+              <span className={`product-card-badge ${totalDiscountPercent > 0 ? "new" : "bestseller"}`} style={modalStyles.discountTag}>
+                {totalDiscountPercent > 0 ? `${totalDiscountPercent}% OFF` : "Bestseller"}
               </span>
             </div>
             
@@ -109,7 +111,7 @@ const ProductDetailsModal = ({ product, onClose }) => {
             {/* Pricing block */}
             <div style={modalStyles.priceBlock}>
               <span style={modalStyles.sellingPrice}>${usdPrice.toFixed(2)}</span>
-              {parseFloat(product.discount) > 0 && (
+              {oldUsdPrice > usdPrice && (
                 <span style={modalStyles.oldPrice}>${oldUsdPrice.toFixed(2)}</span>
               )}
               {saveAmount > 0 && (

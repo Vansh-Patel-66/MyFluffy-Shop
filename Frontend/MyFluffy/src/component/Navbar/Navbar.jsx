@@ -79,6 +79,12 @@ const Navbar = ({ activePage, setActivePage, setShopCategory }) => {
           >
             About
           </button>
+          <button 
+            className={`nav-link-btn ${activePage === "contact" ? "active" : ""}`}
+            onClick={() => handleNavClick("contact")}
+          >
+            Contact
+          </button>
         </div>
 
         {/* Navigation Action Buttons */}
