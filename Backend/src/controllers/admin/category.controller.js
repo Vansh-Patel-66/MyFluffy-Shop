@@ -1,4 +1,5 @@
 import Category from '../../models/categories.model.js';
+import Product from '../../models/product.model.js';
 
 export const createCategory = async (req, res) => {
   try {
@@ -61,6 +62,10 @@ export const updateCategory = async (req, res) => {
 
 export const deleteCategory = async (req, res) => {
   try {
+    await Product.update(
+      { category_id: null },
+      { where: { category_id: req.params.id } }
+    );
     const deleted = await Category.destroy({
       where: { id: req.params.id }
     });

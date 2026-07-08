@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { productAPI } from "../../utils/api";
+import { productAPI, categoryAPI, getImageUrl } from "../../utils/api";
 import { useCart } from "../../context/CartContext";
 import { ArrowRight, Sparkles, Star, Truck, Award, ShieldCheck } from "lucide-react";
 import "../../style/home/home.css";
@@ -7,15 +7,19 @@ import "../../style/home/home.css";
 const Home = ({ setActivePage, setSelectedProduct, setSelectedCategory }) => {
   const { addToCart } = useCart();
   const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchFeatured = async () => {
       try {
-        const res = await productAPI.getAll();
-        const activeProducts = (res || []).filter((p) => p.is_active);
-        // Take the first 8 active products as featured
+        const [res, cats] = await Promise.all([
+          productAPI.getAll(),
+          categoryAPI.getAll()
+        ]);
+        const activeProducts = (res || []).filter((p) => p.is_active && p.featured_on_homepage);
         setFeaturedProducts(activeProducts.slice(0, 8));
+        setCategories(cats || []);
       } catch (err) {
         console.error("Error fetching featured products:", err);
       } finally {
@@ -121,35 +125,29 @@ const Home = ({ setActivePage, setSelectedProduct, setSelectedCategory }) => {
         </div>
 
         <div className="curated-categories-grid">
-          {/* Soft Toys */}
-          <div className="curated-category-card soft-toys-bg" onClick={() => handleCategoryClick("Soft Toys")}>
-            <div className="category-card-overlay"></div>
-            <div className="category-card-content">
-              <h3>Soft Toys</h3>
-              <p>Best friends in plush form</p>
-              <span className="explore-link">Explore <ArrowRight size={14} /></span>
+          {categories.length > 0 ? categories.map((cat, index) => {
+            const bgs = ["soft-toys-bg", "blankets-bg", "pillows-bg", "soft-toys-bg"];
+            const bgClass = bgs[index % bgs.length];
+            return (
+              <div 
+                key={cat.id} 
+                className={`curated-category-card ${!cat.image_url ? bgClass : ""}`} 
+                style={cat.image_url ? { backgroundImage: `url(${getImageUrl(cat.image_url)})` } : {}}
+                onClick={() => handleCategoryClick(cat.name)}
+              >
+                <div className="category-card-overlay"></div>
+                <div className="category-card-content">
+                  <h3>{cat.name}</h3>
+                  <p>{cat.description}</p>
+                  <span className="explore-link">Explore <ArrowRight size={14} /></span>
+                </div>
+              </div>
+            );
+          }) : (
+            <div style={{ gridColumn: "1 / -1", display: "flex", justifyContent: "center", alignItems: "center", height: "30vh", margin: "auto" }}>
+              <h3 style={{ fontFamily: "var(--font-display)", fontSize: "3rem", fontWeight: "800", color: "#94a3b8", textAlign: "center", textTransform: "uppercase", letterSpacing: "0.05em" }}>No Category Available</h3>
             </div>
-          </div>
-
-          {/* Blankets */}
-          <div className="curated-category-card blankets-bg" onClick={() => handleCategoryClick("Blankets")}>
-            <div className="category-card-overlay"></div>
-            <div className="category-card-content">
-              <h3>Blankets</h3>
-              <p>Cloud-soft warmth, every night</p>
-              <span className="explore-link">Explore <ArrowRight size={14} /></span>
-            </div>
-          </div>
-
-          {/* Pillows */}
-          <div className="curated-category-card pillows-bg" onClick={() => handleCategoryClick("Pillows")}>
-            <div className="category-card-overlay"></div>
-            <div className="category-card-content">
-              <h3>Pillows</h3>
-              <p>Dream-worthy comfort, night after night</p>
-              <span className="explore-link">Explore <ArrowRight size={14} /></span>
-            </div>
-          </div>
+          )}
         </div>
       </section>
 
@@ -176,7 +174,7 @@ const Home = ({ setActivePage, setSelectedProduct, setSelectedCategory }) => {
               <div key={product.id} className="bestseller-product-card" onClick={() => handleProductClick(product)}>
                 <div className="product-card-image-box">
                   <img
-                    src={product.image_url || "https://images.unsplash.com/photo-1559251606-c623743a6d76?q=80&w=600&auto=format&fit=crop"}
+                    src={getImageUrl(product.image_url) || "https://images.unsplash.com/photo-1559251606-c623743a6d76?q=80&w=600&auto=format&fit=crop"}
                     alt={product.name}
                     className="product-card-img"
                   />
@@ -203,11 +201,8 @@ const Home = ({ setActivePage, setSelectedProduct, setSelectedCategory }) => {
             ))}
           </div>
         ) : (
-          <div className="no-products-prompt glass-panel">
-            <p>We are stocking up our virtual shelves with fluffy pillows!</p>
-            <button className="btn-primary" onClick={() => setActivePage("shop")}>
-              Visit Shop Catalog
-            </button>
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "30vh", margin: "auto" }}>
+            <h3 style={{ fontFamily: "var(--font-display)", fontSize: "3rem", fontWeight: "800", color: "#94a3b8", textAlign: "center", textTransform: "uppercase", letterSpacing: "0.05em" }}>No Favourit Item Avaliable</h3>
           </div>
         )}
       </section>

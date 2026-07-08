@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useCart as useCartContext } from "../../context/CartContext";
 import { X, ShoppingCart, Star, ShieldCheck, Heart, Truck, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { getImageUrl } from "../../utils/api";
 
 const ProductDetailsModal = ({ product, onClose }) => {
   const { addToCart } = useCartContext();
@@ -43,9 +44,17 @@ const ProductDetailsModal = ({ product, onClose }) => {
     }));
   };
 
-  // Mock secondary image for thumbnail switching
-  const secondaryImage = "https://images.unsplash.com/photo-1631679706909-1844bbd07221?q=80&w=600&auto=format&fit=crop";
-  const images = [product.image_url, secondaryImage];
+  // Build images array: main image first, then any additional images
+  const images = [];
+  if (product.image_url) images.push(getImageUrl(product.image_url));
+  if (product.product_images && product.product_images.length > 0) {
+    product.product_images.forEach(img => {
+      images.push(getImageUrl(img.image_url));
+    });
+  }
+  if (images.length === 0) {
+    images.push("https://images.unsplash.com/photo-1631679706909-1844bbd07221?q=80&w=600&auto=format&fit=crop");
+  }
 
   return (
     <div style={modalStyles.overlay} onClick={onClose}>
@@ -65,7 +74,7 @@ const ProductDetailsModal = ({ product, onClose }) => {
           <div style={modalStyles.imageArea}>
             <div style={modalStyles.mainImageContainer}>
               <img
-                src={images[activeImageIndex] || product.image_url}
+                src={images[activeImageIndex]}
                 alt={product.name}
                 style={modalStyles.image}
               />

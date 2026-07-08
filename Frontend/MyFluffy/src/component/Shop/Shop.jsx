@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { productAPI, categoryAPI } from "../../utils/api";
+import { productAPI, categoryAPI, getImageUrl } from "../../utils/api";
 import { useCart } from "../../context/CartContext";
 import { Star } from "lucide-react";
 import "../../style/shop.css";
@@ -123,6 +123,11 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
               >
                 All Products
               </button>
+              {categories.length === 0 && (
+                <div style={{ padding: "1rem 0", display: "flex", justifyContent: "center" }}>
+                  <span style={{ fontFamily: "var(--font-display)", fontSize: "0.9rem", fontWeight: "600", color: "#94a3b8", textAlign: "center", textTransform: "uppercase", letterSpacing: "0.05em" }}>No Category Available</span>
+                </div>
+              )}
               {categories.map((cat) => {
                 // Map display names to match mockup
                 let displayName = cat.name;
@@ -200,7 +205,7 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
                   <div key={product.id} className="bestseller-product-card" onClick={() => handleProductClick(product)}>
                     <div className="product-card-image-box">
                       <img
-                        src={product.image_url || "https://images.unsplash.com/photo-1559251606-c623743a6d76?q=80&w=600&auto=format&fit=crop"}
+                        src={getImageUrl(product.image_url) || "https://images.unsplash.com/photo-1559251606-c623743a6d76?q=80&w=600&auto=format&fit=crop"}
                         alt={product.name}
                         className="product-card-img"
                       />
@@ -227,15 +232,8 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
               })}
             </div>
           ) : (
-            <div className="no-products-prompt glass-panel">
-              <h3>No matching clouds found</h3>
-              <p>Try adjusting your price filter or select a different category.</p>
-              <button 
-                className="btn-secondary" 
-                onClick={() => { setSelectedCategory("all"); setMaxPrice(200); }}
-              >
-                Reset Filters
-              </button>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh", margin: "auto" }}>
+              <h3 style={{ fontFamily: "var(--font-display)", fontSize: "3rem", fontWeight: "800", color: "#94a3b8", textAlign: "center", textTransform: "uppercase", letterSpacing: "0.05em" }}>No Item Available</h3>
             </div>
           )}
         </main>

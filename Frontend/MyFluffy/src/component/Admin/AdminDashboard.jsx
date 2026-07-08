@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { productAPI, categoryAPI, orderAPI, authAPI, contactAPI, analyticsAPI } from "../../utils/api";
+import { productAPI, categoryAPI, orderAPI, authAPI, contactAPI, analyticsAPI, uploadAPI, getImageUrl } from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
-import { ShieldCheck, TrendingUp, ShoppingBag, FolderHeart, FilePlus, Edit3, Trash2, Settings, UserCheck, Inbox, Plus, RefreshCw, Eye } from "lucide-react";
+import { ShieldCheck, TrendingUp, ShoppingBag, FolderHeart, FilePlus, Edit3, Trash2, Settings, UserCheck, Inbox, Plus, RefreshCw, Eye, X } from "lucide-react";
 import "../../style/admin.css";
 
 const AdminDashboard = () => {
@@ -32,11 +32,14 @@ const AdminDashboard = () => {
   const [prodStock, setProdStock] = useState("");
   const [prodCategoryId, setProdCategoryId] = useState("");
   const [prodImageUrl, setProdImageUrl] = useState("");
+  const [prodAdditionalImages, setProdAdditionalImages] = useState([]);
   const [prodIsActive, setProdIsActive] = useState(true);
+  const [prodFeatured, setProdFeatured] = useState(false);
 
   // Form Fields - Categories
   const [catName, setCatName] = useState("");
   const [catDesc, setCatDesc] = useState("");
+  const [catImageUrl, setCatImageUrl] = useState("");
 
   const refreshData = async () => {
     try {
@@ -93,7 +96,9 @@ const AdminDashboard = () => {
     setProdStock("10");
     setProdCategoryId(categories[0]?.id || "");
     setProdImageUrl("");
+    setProdAdditionalImages([]);
     setProdIsActive(true);
+    setProdFeatured(false);
     setShowProductModal(true);
   };
 
@@ -107,7 +112,9 @@ const AdminDashboard = () => {
     setProdStock(p.stock);
     setProdCategoryId(p.category_id || "");
     setProdImageUrl(p.image_url || "");
+    setProdAdditionalImages(p.product_images ? p.product_images.map(img => img.image_url) : []);
     setProdIsActive(p.is_active);
+    setProdFeatured(p.featured_on_homepage || false);
     setShowProductModal(true);
   };
 
@@ -127,7 +134,9 @@ const AdminDashboard = () => {
       stock: parseInt(prodStock),
       category_id: prodCategoryId || null,
       image_url: prodImageUrl || null,
+      image_urls: prodAdditionalImages,
       is_active: prodIsActive,
+      featured_on_homepage: prodFeatured,
     };
 
     try {
@@ -145,6 +154,32 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleProductImageUpload = async (e, isAdditional = false) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        setLoading(true);
+        const res = await uploadAPI.uploadImage(file);
+        if (res.success) {
+          if (isAdditional) {
+            setProdAdditionalImages(prev => [...prev, res.url]);
+          } else {
+            setProdImageUrl(res.url);
+          }
+          showToast("Image uploaded successfully!", "success");
+        }
+      } catch (err) {
+        showToast("Image upload failed", "error");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const removeAdditionalImage = (index) => {
+    setProdAdditionalImages(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleDeleteProduct = async (id) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
     try {
@@ -160,6 +195,15 @@ const AdminDashboard = () => {
     setEditingCategory(null);
     setCatName("");
     setCatDesc("");
+    setCatImageUrl("");
+    setShowCategoryModal(true);
+  };
+
+  const openEditCategory = (c) => {
+    setEditingCategory(c);
+    setCatName(c.name);
+    setCatDesc(c.description);
+    setCatImageUrl(c.image_url || "");
     setShowCategoryModal(true);
   };
 
@@ -172,10 +216,10 @@ const AdminDashboard = () => {
 
     try {
       if (editingCategory) {
-        await categoryAPI.update(editingCategory.id, { name: catName, description: catDesc });
+        await categoryAPI.update(editingCategory.id, { name: catName, description: catDesc, image_url: catImageUrl });
         showToast("Category updated", "success");
       } else {
-        await categoryAPI.create({ name: catName, description: catDesc });
+        await categoryAPI.create({ name: catName, description: catDesc, image_url: catImageUrl });
         showToast("New category added", "success");
       }
       setShowCategoryModal(false);
@@ -193,6 +237,24 @@ const AdminDashboard = () => {
       refreshData();
     } catch (err) {
       showToast("Could not delete category", "error");
+    }
+  };
+
+  const handleCategoryImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        setLoading(true);
+        const res = await uploadAPI.uploadImage(file);
+        if (res.success) {
+          setCatImageUrl(res.url);
+          showToast("Image uploaded successfully!", "success");
+        }
+      } catch (err) {
+        showToast("Image upload failed", "error");
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -349,7 +411,7 @@ const AdminDashboard = () => {
                       <tr key={p.id}>
                         <td>
                           <div className="table-prod-info">
-                            <img src={p.image_url || "https://images.unsplash.com/photo-1559251606-c623743a6d76?q=80&w=150&auto=format&fit=crop"} alt="" className="table-prod-img" />
+                            <img src={getImageUrl(p.image_url) || "https://images.unsplash.com/photo-1559251606-c623743a6d76?q=80&w=150&auto=format&fit=crop"} alt="" className="table-prod-img" />
                             <div>
                               <strong>{p.name}</strong>
                               <span>{cat ? cat.name : "Uncategorized"}</span>
@@ -419,6 +481,9 @@ const AdminDashboard = () => {
                       <td><strong>{c.name}</strong></td>
                       <td>{c.description}</td>
                       <td>
+                        <button className="action-icon-btn edit-action" title="Edit Category" onClick={() => openEditCategory(c)} style={{ marginRight: '8px' }}>
+                          <Edit3 size={16} />
+                        </button>
                         <button className="action-icon-btn delete-action" title="Delete Category" onClick={() => handleDeleteCategory(c.id)}>
                           <Trash2 size={16} />
                         </button>
@@ -573,9 +638,26 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              <div className="form-group">
-                <label>Image URL</label>
-                <input type="text" placeholder="https://images.unsplash.com/...image.jpg" value={prodImageUrl} onChange={(e) => setProdImageUrl(e.target.value)} />
+              <div className="form-row-2">
+                <div className="form-group">
+                  <label>Main Product Image</label>
+                  <input type="file" accept="image/*" onChange={(e) => handleProductImageUpload(e, false)} disabled={loading} />
+                  {prodImageUrl && <img src={getImageUrl(prodImageUrl)} alt="Preview" style={{ width: "100px", marginTop: "10px", borderRadius: "8px", objectFit: "cover" }} />}
+                </div>
+                <div className="form-group">
+                  <label>Additional Images</label>
+                  <input type="file" accept="image/*" onChange={(e) => handleProductImageUpload(e, true)} disabled={loading} />
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
+                    {prodAdditionalImages.map((img, idx) => (
+                      <div key={idx} style={{ position: 'relative' }}>
+                        <img src={getImageUrl(img)} alt={`Extra ${idx}`} style={{ width: "60px", height: "60px", borderRadius: "8px", objectFit: "cover" }} />
+                        <button type="button" onClick={() => removeAdditionalImage(idx)} style={{ position: 'absolute', top: -5, right: -5, background: 'red', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               <div className="form-group">
@@ -586,6 +668,11 @@ const AdminDashboard = () => {
               <div className="checkbox-group">
                 <input type="checkbox" id="prodActive" checked={prodIsActive} onChange={(e) => setProdIsActive(e.target.checked)} />
                 <label htmlFor="prodActive">Product visible in Catalog</label>
+              </div>
+
+              <div className="checkbox-group" style={{ marginTop: "10px" }}>
+                <input type="checkbox" id="prodFeatured" checked={prodFeatured} onChange={(e) => setProdFeatured(e.target.checked)} />
+                <label htmlFor="prodFeatured">Display on Fan favorites at Home</label>
               </div>
 
               <div className="form-actions-row">
@@ -601,7 +688,7 @@ const AdminDashboard = () => {
       {showCategoryModal && (
         <div className="admin-modal-overlay animate-fade-in" onClick={() => setShowCategoryModal(false)}>
           <div className="admin-modal glass-panel" onClick={(e) => e.stopPropagation()}>
-            <h3>☁️ Add Category</h3>
+            <h3>{editingCategory ? "☁️ Edit Category" : "☁️ Add Category"}</h3>
             <hr />
 
             <form onSubmit={handleCategorySubmit} className="admin-modal-form">
@@ -613,6 +700,12 @@ const AdminDashboard = () => {
               <div className="form-group">
                 <label>Brief Description</label>
                 <textarea rows={3} placeholder="Therapeutic weighted cotton cover blanks..." value={catDesc} onChange={(e) => setCatDesc(e.target.value)} required></textarea>
+              </div>
+
+              <div className="form-group">
+                <label>Category Image (Optional)</label>
+                <input type="file" accept="image/*" onChange={handleCategoryImageUpload} disabled={loading} />
+                {catImageUrl && <img src={getImageUrl(catImageUrl)} alt="Preview" style={{ width: "100px", marginTop: "10px", borderRadius: "8px", objectFit: "cover" }} />}
               </div>
 
               <div className="form-actions-row">
