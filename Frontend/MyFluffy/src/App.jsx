@@ -16,21 +16,63 @@ import Orders from "./component/Orders/Orders";
 import Contact from "./component/Contact/Contact";
 import AboutUs from "./component/AboutUs/AboutUs";
 import AdminDashboard from "./component/Admin/AdminDashboard";
+import AdminLogin from "./component/Admin/AdminLogin";
 import Footer from "./component/Footer/Footer";
 
 import "./App.css";
 
 function AppContent() {
   const { user } = useAuth();
-  const [activePage, setActivePage] = useState("home");
+  const [activePage, setActivePage] = useState(() => {
+    const path = window.location.pathname;
+    if (path.startsWith("/admin")) {
+      return path === "/admin/login" ? "adminLogin" : "admin";
+    }
+    return "home";
+  });
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   const handleLoginSuccess = (loggedInUser) => {
+    // Normal login doesn't allow admin entry anymore (or we just redirect them if they somehow logged in)
     if (loggedInUser && loggedInUser.role === "admin") {
       setActivePage("admin");
+      window.history.pushState({}, "", "/admin");
     } else {
       setActivePage("home");
+      window.history.pushState({}, "", "/");
+    }
+  };
+
+  const handleAdminLoginSuccess = (loggedInUser) => {
+    if (loggedInUser && loggedInUser.role === "admin") {
+      setActivePage("admin");
+      window.history.pushState({}, "", "/admin");
+    }
+  };
+
+  // Sync back button / URL changes
+  React.useEffect(() => {
+    const onPopState = () => {
+      const path = window.location.pathname;
+      if (path.startsWith("/admin")) {
+        setActivePage(path === "/admin/login" ? "adminLogin" : "admin");
+      } else {
+        setActivePage("home");
+      }
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  const changePage = (page) => {
+    setActivePage(page);
+    if (page === "admin") {
+      window.history.pushState({}, "", "/admin");
+    } else if (page === "adminLogin") {
+      window.history.pushState({}, "", "/admin/login");
+    } else {
+      window.history.pushState({}, "", "/");
     }
   };
 
@@ -58,22 +100,27 @@ function AppContent() {
         if (user && user.role === "admin") {
           return <AdminDashboard />;
         }
-        return <Home setActivePage={setActivePage} setSelectedProduct={setSelectedProduct} setSelectedCategory={setSelectedCategory} />;
+        return <AdminLogin onLoginSuccess={handleAdminLoginSuccess} />;
+      case "adminLogin":
+        if (user && user.role === "admin") {
+          return <AdminDashboard />;
+        }
+        return <AdminLogin onLoginSuccess={handleAdminLoginSuccess} />;
       case "login":
         if (user) {
-          return <Home setActivePage={setActivePage} setSelectedProduct={setSelectedProduct} setSelectedCategory={setSelectedCategory} />;
+          return <Home setActivePage={changePage} setSelectedProduct={setSelectedProduct} setSelectedCategory={setSelectedCategory} />;
         }
-        return <Login onLoginSuccess={handleLoginSuccess} setActivePage={setActivePage} />;
+        return <Login onLoginSuccess={handleLoginSuccess} setActivePage={changePage} />;
       case "signup":
         if (user) {
-          return <Home setActivePage={setActivePage} setSelectedProduct={setSelectedProduct} setSelectedCategory={setSelectedCategory} />;
+          return <Home setActivePage={changePage} setSelectedProduct={setSelectedProduct} setSelectedCategory={setSelectedCategory} />;
         }
-        return <Signup setActivePage={setActivePage} />;
+        return <Signup setActivePage={changePage} />;
       case "home":
       default:
         return (
           <Home
-            setActivePage={setActivePage}
+            setActivePage={changePage}
             setSelectedProduct={setSelectedProduct}
             setSelectedCategory={setSelectedCategory}
           />
@@ -81,14 +128,18 @@ function AppContent() {
     }
   };
 
+  const isAdminRoute = activePage === "admin" || activePage === "adminLogin";
+
   return (
     <div className="app-viewport">
       {/* Dynamic Navigation Header */}
-      <Navbar
-        activePage={activePage}
-        setActivePage={setActivePage}
-        setShopCategory={setSelectedCategory}
-      />
+      {!isAdminRoute && (
+        <Navbar
+          activePage={activePage}
+          setActivePage={changePage}
+          setShopCategory={setSelectedCategory}
+        />
+      )}
 
       {/* Main Container */}
       <main style={{ flex: 1 }}>
@@ -96,7 +147,7 @@ function AppContent() {
       </main>
 
       {/* Render Reusable Footer globally (except in Admin Portal) */}
-      {activePage !== "admin" && <Footer setActivePage={setActivePage} />}
+      {!isAdminRoute && <Footer setActivePage={changePage} />}
 
       <ProductDetailsModal
         product={selectedProduct}

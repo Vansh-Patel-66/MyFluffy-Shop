@@ -21,6 +21,8 @@ const AdminDashboard = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [selectedContact, setSelectedContact] = useState(null);
   const [loading, setLoading] = useState(false);
 
   // Form Fields - Products
@@ -272,9 +274,37 @@ const AdminDashboard = () => {
     try {
       await contactAPI.delete(id);
       showToast("Message archived", "info");
+      if (selectedContact?.id === id) setShowContactModal(false);
       refreshData();
     } catch (err) {
       showToast("Error archving contact", "error");
+    }
+  };
+
+  const openContactDetails = (contact) => {
+    setSelectedContact(contact);
+    setShowContactModal(true);
+  };
+
+  const handleDeleteOrder = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this order?")) return;
+    try {
+      await orderAPI.delete(id);
+      showToast("Order deleted", "info");
+      refreshData();
+    } catch (err) {
+      showToast("Could not delete order", "error");
+    }
+  };
+
+  const handleDeleteUser = async (email) => {
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
+    try {
+      await authAPI.deleteUser(email);
+      showToast("User deleted", "info");
+      refreshData();
+    } catch (err) {
+      showToast("Could not delete user", "error");
     }
   };
 
@@ -310,6 +340,9 @@ const AdminDashboard = () => {
         </button>
         <button className={`tab-btn ${activeTab === "support" ? "active" : ""}`} onClick={() => setActiveTab("support")}>
           📥 Inbox Inquiries ({contacts.length})
+        </button>
+        <button className={`tab-btn ${activeTab === "users" ? "active" : ""}`} onClick={() => setActiveTab("users")}>
+          👥 Registered Users ({users.length})
         </button>
       </div>
 
@@ -481,12 +514,14 @@ const AdminDashboard = () => {
                       <td><strong>{c.name}</strong></td>
                       <td>{c.description}</td>
                       <td>
-                        <button className="action-icon-btn edit-action" title="Edit Category" onClick={() => openEditCategory(c)} style={{ marginRight: '8px' }}>
-                          <Edit3 size={16} />
-                        </button>
-                        <button className="action-icon-btn delete-action" title="Delete Category" onClick={() => handleDeleteCategory(c.id)}>
-                          <Trash2 size={16} />
-                        </button>
+                        <div className="table-actions">
+                          <button className="action-icon-btn edit-action" title="Edit Category" onClick={() => openEditCategory(c)}>
+                            <Edit3 size={16} />
+                          </button>
+                          <button className="action-icon-btn delete-action" title="Delete Category" onClick={() => handleDeleteCategory(c.id)}>
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -508,6 +543,7 @@ const AdminDashboard = () => {
                     <th>Total Billing</th>
                     <th>Payment Status</th>
                     <th>Order Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -546,6 +582,11 @@ const AdminDashboard = () => {
                             <option value="cancelled">Cancelled</option>
                           </select>
                         </td>
+                        <td>
+                          <button className="action-icon-btn delete-action" title="Delete Order" onClick={() => handleDeleteOrder(o.id)}>
+                            <Trash2 size={16} />
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}
@@ -579,9 +620,62 @@ const AdminDashboard = () => {
                         </div>
                       </td>
                       <td><span className="badge badge-info">{c.type || "General Inquiry"}</span></td>
-                      <td><p style={{ maxWidth: "350px", fontSize: "0.85rem", lineHeight: "1.4" }}>{c.message}</p></td>
+                      <td><p style={{ maxWidth: "350px", fontSize: "0.85rem", lineHeight: "1.4", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.message}</p></td>
                       <td>
-                        <button className="action-icon-btn delete-action" title="Archive Query" onClick={() => handleDeleteContact(c.id)}>
+                        <div className="table-actions">
+                          <button className="action-icon-btn edit-action" title="View Query" onClick={() => openContactDetails(c)}>
+                            <Eye size={16} />
+                          </button>
+                          <button className="action-icon-btn delete-action" title="Archive Query" onClick={() => handleDeleteContact(c.id)}>
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "users" && (
+          <div className="users-view animate-fade-in">
+            <h3>Registered Clients Management</h3>
+
+            <div className="table-wrapper glass-panel">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>User Detail</th>
+                    <th>Role</th>
+                    <th>Verified</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((u) => (
+                    <tr key={u.email}>
+                      <td>
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                          <strong>{u.email}</strong>
+                          <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Joined: {new Date(u.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`badge ${u.role === "admin" ? "badge-warning" : "badge-info"}`}>
+                          {u.role.toUpperCase()}
+                        </span>
+                      </td>
+                      <td>
+                        {u.is_email_verified ? (
+                          <span className="badge badge-success">Verified</span>
+                        ) : (
+                          <span className="badge badge-danger">Unverified</span>
+                        )}
+                      </td>
+                      <td>
+                        <button className="action-icon-btn delete-action" title="Delete User" onClick={() => handleDeleteUser(u.email)} disabled={u.role === "admin"}>
                           <Trash2 size={16} />
                         </button>
                       </td>
@@ -713,6 +807,37 @@ const AdminDashboard = () => {
                 <button type="button" className="btn-secondary" onClick={() => setShowCategoryModal(false)}>Cancel</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* View Contact Modal */}
+      {showContactModal && selectedContact && (
+        <div className="admin-modal-overlay animate-fade-in" onClick={() => setShowContactModal(false)}>
+          <div className="admin-modal glass-panel" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "500px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3>📥 Message Details</h3>
+              <button onClick={() => setShowContactModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)" }}><X size={20} /></button>
+            </div>
+            <hr />
+            
+            <div style={{ marginBottom: "16px" }}>
+              <p style={{ margin: "4px 0", fontSize: "0.9rem" }}><strong>Name:</strong> {selectedContact.name}</p>
+              <p style={{ margin: "4px 0", fontSize: "0.9rem" }}><strong>Email:</strong> {selectedContact.email}</p>
+              <p style={{ margin: "4px 0", fontSize: "0.9rem" }}><strong>Phone Number:</strong> {selectedContact.phone || "Not provided"}</p>
+              <p style={{ margin: "4px 0", fontSize: "0.9rem" }}><strong>Category:</strong> {selectedContact.type}</p>
+            </div>
+            
+            <div style={{ background: "rgba(0,0,0,0.2)", padding: "12px", borderRadius: "8px" }}>
+              <strong style={{ display: "block", marginBottom: "8px", fontSize: "0.9rem" }}>Message Content:</strong>
+              <p style={{ whiteSpace: "pre-wrap", fontSize: "0.9rem", lineHeight: "1.5", margin: 0 }}>{selectedContact.message}</p>
+            </div>
+            
+            <div className="form-actions-row" style={{ marginTop: "20px" }}>
+              <button type="button" className="btn-secondary delete-action" onClick={() => handleDeleteContact(selectedContact.id)} style={{ width: "100%", background: "var(--danger-color)", color: "white" }}>
+                Archive Message
+              </button>
+            </div>
           </div>
         </div>
       )}

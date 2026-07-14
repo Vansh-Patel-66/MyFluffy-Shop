@@ -36,6 +36,7 @@ import footerRoutes from "./routes/website/footer.routes.js";
 import analyticsRoutes from "./routes/admin/analytics.routes.js";
 import roleRoutes from "./routes/admin/role.routes.js";
 import uploadRoutes from "./routes/admin/upload.routes.js";
+import adminAuthRoutes from "./routes/admin/auth.routes.js";
 
 const app = express();
 
@@ -115,6 +116,7 @@ app.use("/api/footer", footerRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/role", roleRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/admin", adminAuthRoutes);
 
 // Global Error Handler Middleware
 app.use((err, req, res, next) => {
