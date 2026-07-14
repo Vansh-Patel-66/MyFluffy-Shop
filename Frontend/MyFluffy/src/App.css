@@ -100,11 +100,7 @@ a {
   transition: var(--transition-smooth);
 }
 
-.glass-panel:hover {
-  background: var(--bg-card-hover);
-  box-shadow: var(--shadow-lg);
-  border-color: hsla(var(--primary-hue), 85%, 85%, 0.8);
-}
+
 
 /* Premium Buttons */
 .btn-primary {

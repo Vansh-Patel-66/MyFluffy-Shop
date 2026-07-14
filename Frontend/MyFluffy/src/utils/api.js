@@ -40,6 +40,10 @@ export const authAPI = {
     const response = await api.post("/users/login", { email, password });
     return response.data; // { success: true, token, data: user }
   },
+  adminLogin: async (email, password) => {
+    const response = await api.post("/admin/login", { email, password });
+    return response.data;
+  },
   register: async (email, password, role = "user") => {
     const response = await api.post("/users/register", { email, password, role });
     return response.data; // { success: true, message }

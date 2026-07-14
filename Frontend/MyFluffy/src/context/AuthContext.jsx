@@ -50,6 +50,30 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const adminLogin = async (email, password) => {
+    try {
+      setLoading(true);
+      const res = await authAPI.adminLogin(email, password);
+      if (res.success && res.token) {
+        localStorage.setItem("token", res.token);
+        localStorage.setItem("user", JSON.stringify(res.data));
+        setToken(res.token);
+        setUser(res.data);
+        showToast("Admin logged in successfully!", "success");
+        return { success: true, user: res.data };
+      } else {
+        showToast(res.message || "Admin login failed", "error");
+        return { success: false, message: res.message };
+      }
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || "Invalid admin credentials";
+      showToast(msg, "error");
+      return { success: false, message: msg };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const register = async (email, password, role = "user") => {
     try {
       setLoading(true);
@@ -85,6 +109,7 @@ export const AuthProvider = ({ children }) => {
         token,
         loading,
         login,
+        adminLogin,
         register,
         logout,
         toast,
