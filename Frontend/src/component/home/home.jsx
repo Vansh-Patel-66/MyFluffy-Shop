@@ -353,7 +353,7 @@ const Home = ({ setActivePage, setSelectedProduct, setSelectedCategory }) => {
             </ul>
 
             <button className="btn-primary" onClick={() => setActivePage("about")}>
-              Discover Our Story <ArrowRight size={16} />
+              <Sparkles size={16} /> Explore Our Story in 3D <ArrowRight size={16} />
             </button>
           </div>
         </div>

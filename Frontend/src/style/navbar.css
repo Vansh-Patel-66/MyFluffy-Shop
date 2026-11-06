@@ -12,32 +12,6 @@
   transition: all 0.25s ease;
 }
 
-/* Announcement Bar with Shimmer Animation */
-.announcement-bar {
-  background: linear-gradient(90deg, #c2410c 0%, #ea580c 50%, #f97316 100%);
-  color: #ffffff;
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  padding: 8px 16px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.announcement-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.announcement-icon {
-  animation: gentlePulse 2.5s ease-in-out infinite;
-}
-
 /* Main Navbar */
 .main-navbar {
   padding: 14px 32px;

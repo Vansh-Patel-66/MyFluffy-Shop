@@ -23,15 +23,6 @@ const Navbar = ({ activePage, setActivePage, setShopCategory }) => {
 
   return (
     <header className="site-header">
-      {/* Top Boutique Announcement Bar */}
-      <div className="announcement-bar">
-        <div className="announcement-content">
-          <Sparkles size={13} className="announcement-icon" />
-          <span>Complimentary US shipping on all cozy orders over $49 &bull; 100-Night Softness Guarantee</span>
-          <Sparkles size={13} className="announcement-icon" />
-        </div>
-      </div>
-
       {/* Main Navigation Bar */}
       <nav className="main-navbar">
         <div className="nav-container">
