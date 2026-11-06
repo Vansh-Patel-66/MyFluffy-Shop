@@ -77,7 +77,7 @@
 .checkout-text-input:focus {
   border-color: var(--primary);
   background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(200, 107, 82, 0.12);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.16);
 }
 
 /* Payment Heading */
@@ -209,7 +209,7 @@
   height: 56px;
   border-radius: 10px;
   overflow: hidden;
-  background: #f7f3ee;
+  background: #fbf5ee;
   flex-shrink: 0;
 }
 

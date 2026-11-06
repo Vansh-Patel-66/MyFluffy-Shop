@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { productAPI, categoryAPI, getImageUrl } from "../../utils/api";
 import { formatPrice, getEffectivePrice } from "../../utils/currency";
 import { useCart } from "../../context/CartContext";
-import { Star, Search, SlidersHorizontal, ShoppingBag, X } from "lucide-react";
+import { Star, Search, SlidersHorizontal, ShoppingBag, X, ChevronLeft, ChevronRight } from "lucide-react";
 import "../../style/shop.css";
 
 const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelectedCategory: setExternalCategory }) => {
@@ -17,6 +17,10 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
   const [maxPrice, setMaxPrice] = useState(150);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [sortBy, setSortBy] = useState("featured");
+
+  // Pagination state: default 3 items per page to satisfy requirement
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(3);
 
   useEffect(() => {
     const fetchShopCatalog = async () => {
@@ -55,6 +59,11 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
     }
   }, [externalCategory, categories]);
 
+  // Reset to page 1 whenever any filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, searchQuery, maxPrice, inStockOnly, sortBy, itemsPerPage]);
+
   const handleProductClick = (product) => {
     if (setSelectedProduct) {
       setSelectedProduct(product);
@@ -74,24 +83,22 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
     setMaxPrice(150);
     setInStockOnly(false);
     setSortBy("featured");
+    setCurrentPage(1);
     if (setExternalCategory) {
       setExternalCategory("all");
     }
   };
 
-  // Filter and Sort Logic using true USD prices
+  // Filter and Sort Logic
   const filteredProducts = useMemo(() => {
     return products
       .filter((product) => {
-        // 1. Active status check
         if (!product.is_active) return false;
 
-        // 2. Category check
         if (selectedCategory !== "all" && product.category_id !== selectedCategory) {
           return false;
         }
 
-        // 3. Search query check
         if (searchQuery.trim() !== "") {
           const q = searchQuery.toLowerCase().trim();
           const nameMatches = (product.name || "").toLowerCase().includes(q);
@@ -99,12 +106,10 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
           if (!nameMatches && !descMatches) return false;
         }
 
-        // 4. In-stock check
         if (inStockOnly && (product.stock || 0) <= 0) {
           return false;
         }
 
-        // 5. Price check using true effective price
         const effectivePrice = getEffectivePrice(product.selling_price, product.discount);
         if (effectivePrice > maxPrice) {
           return false;
@@ -119,21 +124,35 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
         if (sortBy === "price-low") return priceA - priceB;
         if (sortBy === "price-high") return priceB - priceA;
         if (sortBy === "alpha") return a.name.localeCompare(b.name);
-        // Featured / Newest
+        // Featured
         if (a.featured_on_homepage && !b.featured_on_homepage) return -1;
         if (!a.featured_on_homepage && b.featured_on_homepage) return 1;
         return new Date(b.created_at || 0) - new Date(a.created_at || 0);
       });
   }, [products, selectedCategory, searchQuery, inStockOnly, maxPrice, sortBy]);
 
+  // Pagination slicing
+  const totalItems = filteredProducts.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+  const currentProducts = filteredProducts.slice(startIndex, endIndex);
+
+  const goToPage = (p) => {
+    const pageNum = Math.max(1, Math.min(p, totalPages));
+    setCurrentPage(pageNum);
+    // Smooth scroll to top of catalog
+    window.scrollTo({ top: 120, behavior: "smooth" });
+  };
+
   return (
     <div className="shop-page animate-fade-in">
-      {/* ── SHOP HEADER ── */}
+      {/* ── SHOP HERO HEADER ── */}
       <header className="shop-hero-header">
-        <span className="shop-eyebrow">THE ARCHIVE</span>
-        <h1 className="shop-page-title">Curated Cozy Catalog</h1>
+        <span className="shop-eyebrow">OUR COLLECTION</span>
+        <h1 className="shop-page-title">Curated Comfort Catalog</h1>
         <p className="shop-page-sub">
-          Every item is crafted with premium micro-plush fibers, cloud-fill stuffing, and child-safe construction.
+          Handcrafted plushies, velveteen blankets, and cloud contour pillows — designed for genuine coziness.
         </p>
 
         {/* Global Catalog Search Bar */}
@@ -141,7 +160,7 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
           <Search size={18} className="search-bar-icon" />
           <input
             type="text"
-            placeholder="Search plushies, blankets, or contour pillows..."
+            placeholder="Search plushies, blankets, pillows..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="shop-search-input"
@@ -167,7 +186,7 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
             </span>
             {(selectedCategory !== "all" || searchQuery || maxPrice < 150 || inStockOnly) && (
               <button className="reset-filters-btn" onClick={handleResetFilters}>
-                Reset
+                Reset All
               </button>
             )}
           </div>
@@ -180,7 +199,7 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
                 className={`category-pill-btn ${selectedCategory === "all" ? "active" : ""}`}
                 onClick={() => handleCategorySelect("all")}
               >
-                <span>All Collections</span>
+                <span>All Products</span>
                 <span className="pill-count">{products.filter((p) => p.is_active).length}</span>
               </button>
               {categories.map((cat) => {
@@ -259,11 +278,27 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
 
         {/* ── MAIN PRODUCT SHELF ── */}
         <main className="shop-main">
-          {/* Results count & status */}
+          {/* Results count & Page Size Selector Bar */}
           <div className="catalog-meta-bar">
             <p className="results-count-text">
-              Showing <strong>{filteredProducts.length}</strong> {filteredProducts.length === 1 ? "piece" : "pieces"}
+              Showing <strong>{totalItems > 0 ? `${startIndex + 1}–${endIndex}` : 0}</strong> of <strong>{totalItems}</strong> items
             </p>
+
+            <div className="per-page-selector">
+              <span className="per-page-label">Show per page:</span>
+              <div className="per-page-btns">
+                {[3, 6, 9].map((size) => (
+                  <button
+                    key={size}
+                    type="button"
+                    className={`per-page-btn ${itemsPerPage === size ? "active" : ""}`}
+                    onClick={() => setItemsPerPage(size)}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {loading ? (
@@ -271,90 +306,126 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
               <span className="spinner"></span>
               <p>Fetching cozy products...</p>
             </div>
-          ) : filteredProducts.length > 0 ? (
-            <div className="products-grid">
-              {filteredProducts.map((product) => {
-                const effectivePrice = getEffectivePrice(product.selling_price, product.discount);
-                const hasDiscount = parseFloat(product.discount) > 0;
-                const isLowStock = (product.stock || 0) > 0 && (product.stock || 0) <= 5;
-                const imgSource = getImageUrl(product.image_url) || "https://images.unsplash.com/photo-1559251606-c623743a6d76?q=80&w=600&auto=format&fit=crop";
+          ) : currentProducts.length > 0 ? (
+            <>
+              {/* Product Grid: 3 Clean Columns */}
+              <div className="products-grid-three">
+                {currentProducts.map((product) => {
+                  const effectivePrice = getEffectivePrice(product.selling_price, product.discount);
+                  const hasDiscount = parseFloat(product.discount) > 0;
+                  const isLowStock = (product.stock || 0) > 0 && (product.stock || 0) <= 5;
+                  const imgSource = getImageUrl(product.image_url) || "https://images.unsplash.com/photo-1559251606-c623743a6d76?q=80&w=600&auto=format&fit=crop";
 
-                return (
-                  <article
-                    key={product.id}
-                    className="product-boutique-card"
-                    onClick={() => handleProductClick(product)}
-                  >
-                    <div className="product-image-container">
-                      <img
-                        src={imgSource}
-                        alt={product.name}
-                        className="product-card-thumbnail"
-                        loading="lazy"
-                      />
+                  return (
+                    <article
+                      key={product.id}
+                      className="product-boutique-card"
+                      onClick={() => handleProductClick(product)}
+                    >
+                      <div className="product-image-container">
+                        <img
+                          src={imgSource}
+                          alt={product.name}
+                          className="product-card-thumbnail"
+                          loading="lazy"
+                        />
 
-                      {/* Tag badges */}
-                      <div className="product-badge-rack">
-                        {hasDiscount && (
-                          <span className="boutique-tag tag-discount">
-                            Save {Math.round(parseFloat(product.discount))}%
-                          </span>
-                        )}
-                        {product.featured_on_homepage && (
-                          <span className="boutique-tag tag-bestseller">
-                            Bestseller
-                          </span>
-                        )}
-                        {isLowStock && (
-                          <span className="boutique-tag tag-lowstock">
-                            Only {product.stock} Left
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Quick Add Overlay */}
-                      <div className="product-card-hover-actions">
-                        <button
-                          className="quick-add-btn"
-                          title="Add to Bag"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            addToCart(product, 1);
-                          }}
-                        >
-                          <ShoppingBag size={16} /> Quick Add
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="product-content-block">
-                      <div className="product-rating-line">
-                        <div className="rating-stars">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} size={13} fill="#d99b45" color="#d99b45" />
-                          ))}
+                        {/* Tag badges */}
+                        <div className="product-badge-rack">
+                          {hasDiscount && (
+                            <span className="boutique-tag tag-discount">
+                              Save {Math.round(parseFloat(product.discount))}%
+                            </span>
+                          )}
+                          {product.featured_on_homepage && (
+                            <span className="boutique-tag tag-bestseller">
+                              Bestseller
+                            </span>
+                          )}
+                          {isLowStock && (
+                            <span className="boutique-tag tag-lowstock">
+                              Only {product.stock} Left
+                            </span>
+                          )}
                         </div>
-                        <span className="rating-count">(400+)</span>
+
+                        {/* Quick Add Overlay */}
+                        <div className="product-card-hover-actions">
+                          <button
+                            className="quick-add-btn"
+                            title="Add to Bag"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addToCart(product, 1);
+                            }}
+                          >
+                            <ShoppingBag size={16} /> Quick Add
+                          </button>
+                        </div>
                       </div>
 
-                      <h3 className="product-title-text">{product.name}</h3>
+                      <div className="product-content-block">
+                        <div className="product-rating-line">
+                          <div className="rating-stars">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} size={13} fill="#f59e0b" color="#f59e0b" />
+                            ))}
+                          </div>
+                          <span className="rating-count">(400+)</span>
+                        </div>
 
-                      <div className="product-price-row">
-                        <span className="price-effective">{formatPrice(effectivePrice)}</span>
-                        {hasDiscount && (
-                          <span className="price-original">{formatPrice(product.selling_price)}</span>
-                        )}
+                        <h3 className="product-title-text">{product.name}</h3>
+
+                        <div className="product-price-row">
+                          <span className="price-effective">{formatPrice(effectivePrice)}</span>
+                          {hasDiscount && (
+                            <span className="price-original">{formatPrice(product.selling_price)}</span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
+                    </article>
+                  );
+                })}
+              </div>
+
+              {/* ── SIMPLE & CLEAN PAGINATION BAR ── */}
+              {totalPages > 1 && (
+                <nav className="pagination-nav-bar" aria-label="Catalog pagination">
+                  <button
+                    className="pagination-btn pagination-prev"
+                    disabled={currentPage === 1}
+                    onClick={() => goToPage(currentPage - 1)}
+                  >
+                    <ChevronLeft size={16} /> Previous
+                  </button>
+
+                  <div className="pagination-pages-list">
+                    {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pageNum) => (
+                      <button
+                        key={pageNum}
+                        className={`pagination-page-number ${currentPage === pageNum ? "active" : ""}`}
+                        onClick={() => goToPage(pageNum)}
+                      >
+                        {pageNum}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    className="pagination-btn pagination-next"
+                    disabled={currentPage === totalPages}
+                    onClick={() => goToPage(currentPage + 1)}
+                  >
+                    Next <ChevronRight size={16} />
+                  </button>
+                </nav>
+              )}
+            </>
           ) : (
             <div className="no-matches-container">
               <div className="no-matches-icon">🔍</div>
-              <h3>No matching cozy items found</h3>
-              <p>Try widening your price range or adjusting your search term.</p>
+              <h3>No matching items found</h3>
+              <p>Try clearing filters or adjusting your search keyword.</p>
               <button className="btn-secondary" onClick={handleResetFilters}>
                 Clear All Filters
               </button>
