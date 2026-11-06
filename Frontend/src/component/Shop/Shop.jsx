@@ -1,9 +1,12 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { productAPI, categoryAPI, getImageUrl } from "../../utils/api";
 import { formatPrice, getEffectivePrice } from "../../utils/currency";
 import { useCart } from "../../context/CartContext";
-import { Star, Search, SlidersHorizontal, ShoppingBag, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, Search, SlidersHorizontal, ShoppingBag, X, Sparkles, ArrowDown } from "lucide-react";
 import "../../style/shop.css";
+
+const ITEMS_PER_ROW = 3;
+const INITIAL_ROWS = 3; // Top 3 rows visible on page load = 9 items
 
 const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelectedCategory: setExternalCategory }) => {
   const { addToCart } = useCart();
@@ -18,9 +21,10 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
   const [inStockOnly, setInStockOnly] = useState(false);
   const [sortBy, setSortBy] = useState("featured");
 
-  // Pagination state: default 3 items per page to satisfy requirement
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(3);
+  // Scroll reveal state: starts with 3 rows (9 products)
+  const [visibleRows, setVisibleRows] = useState(INITIAL_ROWS);
+  const [isLoadingNextRow, setIsLoadingNextRow] = useState(false);
+  const sentinelRef = useRef(null);
 
   useEffect(() => {
     const fetchShopCatalog = async () => {
@@ -59,10 +63,10 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
     }
   }, [externalCategory, categories]);
 
-  // Reset to page 1 whenever any filter changes
+  // Reset to top 3 rows whenever any filter changes
   useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedCategory, searchQuery, maxPrice, inStockOnly, sortBy, itemsPerPage]);
+    setVisibleRows(INITIAL_ROWS);
+  }, [selectedCategory, searchQuery, maxPrice, inStockOnly, sortBy]);
 
   const handleProductClick = (product) => {
     if (setSelectedProduct) {
@@ -83,7 +87,7 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
     setMaxPrice(150);
     setInStockOnly(false);
     setSortBy("featured");
-    setCurrentPage(1);
+    setVisibleRows(INITIAL_ROWS);
     if (setExternalCategory) {
       setExternalCategory("all");
     }
@@ -131,19 +135,40 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
       });
   }, [products, selectedCategory, searchQuery, inStockOnly, maxPrice, sortBy]);
 
-  // Pagination slicing
-  const totalItems = filteredProducts.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-  const currentProducts = filteredProducts.slice(startIndex, endIndex);
+  const totalFilteredCount = filteredProducts.length;
+  const totalAvailableRows = Math.ceil(totalFilteredCount / ITEMS_PER_ROW);
+  const currentVisibleCount = Math.min(visibleRows * ITEMS_PER_ROW, totalFilteredCount);
+  const visibleProducts = filteredProducts.slice(0, currentVisibleCount);
+  const hasMoreRows = visibleRows < totalAvailableRows;
 
-  const goToPage = (p) => {
-    const pageNum = Math.max(1, Math.min(p, totalPages));
-    setCurrentPage(pageNum);
-    // Smooth scroll to top of catalog
-    window.scrollTo({ top: 120, behavior: "smooth" });
-  };
+  // Reveal next row function
+  const revealNextRow = useCallback(() => {
+    if (hasMoreRows && !isLoadingNextRow) {
+      setIsLoadingNextRow(true);
+      setTimeout(() => {
+        setVisibleRows((prev) => prev + 1);
+        setIsLoadingNextRow(false);
+      }, 250);
+    }
+  }, [hasMoreRows, isLoadingNextRow]);
+
+  // Scroll observer: triggers next row reveal automatically when user scrolls near the bottom
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasMoreRows) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMoreRows && !isLoadingNextRow) {
+          revealNextRow();
+        }
+      },
+      { root: null, rootMargin: "250px", threshold: 0.1 }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMoreRows, isLoadingNextRow, revealNextRow]);
 
   return (
     <div className="shop-page animate-fade-in">
@@ -278,27 +303,16 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
 
         {/* ── MAIN PRODUCT SHELF ── */}
         <main className="shop-main">
-          {/* Results count & Page Size Selector Bar */}
+          {/* Results Header Status */}
           <div className="catalog-meta-bar">
             <p className="results-count-text">
-              Showing <strong>{totalItems > 0 ? `${startIndex + 1}–${endIndex}` : 0}</strong> of <strong>{totalItems}</strong> items
+              Showing <strong>{currentVisibleCount}</strong> of <strong>{totalFilteredCount}</strong> cozy pieces
             </p>
-
-            <div className="per-page-selector">
-              <span className="per-page-label">Show per page:</span>
-              <div className="per-page-btns">
-                {[3, 6, 9].map((size) => (
-                  <button
-                    key={size}
-                    type="button"
-                    className={`per-page-btn ${itemsPerPage === size ? "active" : ""}`}
-                    onClick={() => setItemsPerPage(size)}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {hasMoreRows && (
+              <span className="scroll-hint-pill">
+                <ArrowDown size={13} className="bounce-arrow-icon" /> Scroll down to unfold more rows
+              </span>
+            )}
           </div>
 
           {loading ? (
@@ -306,11 +320,11 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
               <span className="spinner"></span>
               <p>Fetching cozy products...</p>
             </div>
-          ) : currentProducts.length > 0 ? (
+          ) : visibleProducts.length > 0 ? (
             <>
-              {/* Product Grid: 3 Clean Columns */}
+              {/* Product Grid: 3 Clean Columns with Top 3 Rows Initially */}
               <div className="products-grid-three">
-                {currentProducts.map((product) => {
+                {visibleProducts.map((product, index) => {
                   const effectivePrice = getEffectivePrice(product.selling_price, product.discount);
                   const hasDiscount = parseFloat(product.discount) > 0;
                   const isLowStock = (product.stock || 0) > 0 && (product.stock || 0) <= 5;
@@ -320,6 +334,7 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
                     <article
                       key={product.id}
                       className="product-boutique-card"
+                      style={{ animationDelay: `${(index % ITEMS_PER_ROW) * 0.08}s` }}
                       onClick={() => handleProductClick(product)}
                     >
                       <div className="product-image-container">
@@ -388,38 +403,20 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
                 })}
               </div>
 
-              {/* ── SIMPLE & CLEAN PAGINATION BAR ── */}
-              {totalPages > 1 && (
-                <nav className="pagination-nav-bar" aria-label="Catalog pagination">
-                  <button
-                    className="pagination-btn pagination-prev"
-                    disabled={currentPage === 1}
-                    onClick={() => goToPage(currentPage - 1)}
-                  >
-                    <ChevronLeft size={16} /> Previous
-                  </button>
-
-                  <div className="pagination-pages-list">
-                    {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pageNum) => (
-                      <button
-                        key={pageNum}
-                        className={`pagination-page-number ${currentPage === pageNum ? "active" : ""}`}
-                        onClick={() => goToPage(pageNum)}
-                      >
-                        {pageNum}
-                      </button>
-                    ))}
+              {/* Sentinel element to trigger scroll loading for next row */}
+              <div ref={sentinelRef} className="scroll-sentinel-anchor">
+                {hasMoreRows ? (
+                  <div className="scroll-loading-more">
+                    <span className="spinner-sm"></span>
+                    <span>Unfolding next cozy row...</span>
                   </div>
-
-                  <button
-                    className="pagination-btn pagination-next"
-                    disabled={currentPage === totalPages}
-                    onClick={() => goToPage(currentPage + 1)}
-                  >
-                    Next <ChevronRight size={16} />
-                  </button>
-                </nav>
-              )}
+                ) : (
+                  <div className="end-of-collection-banner">
+                    <Sparkles size={16} color="var(--primary)" />
+                    <span>You've seen all {totalFilteredCount} cozy handcrafted pieces.</span>
+                  </div>
+                )}
+              </div>
             </>
           ) : (
             <div className="no-matches-container">
