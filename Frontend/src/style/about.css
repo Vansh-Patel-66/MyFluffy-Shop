@@ -1,113 +1,679 @@
 /* ─────────────────────────────────────────
-   MyFluffy — About Us Page Styles
+   MyFluffy — About Us Page & 3D Story Styles
 ───────────────────────────────────────── */
 
 .about-page {
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 64px 48px 80px;
+  padding: 40px 32px 80px;
   display: flex;
   flex-direction: column;
-  gap: 80px;
+  gap: 72px;
 }
 
-/* ── Shared pre-title label ── */
+/* ── Shared Pre-label ── */
 .about-section-pre {
   display: block;
-  font-family: var(--font-display);
-  font-size: 0.78rem;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
   font-weight: 800;
   letter-spacing: 0.12em;
-  color: var(--text-muted);
+  color: var(--primary);
   text-transform: uppercase;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
-/* ─────────────────────────────────
-   HERO SECTION
-───────────────────────────────────*/
-.about-hero-section {
+/* ─────────────────────────────────────────
+   1. 3D LIVING STORY HERO SECTION
+───────────────────────────────────────── */
+.about-3d-hero-section {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  position: relative;
+}
+
+.story-hero-header {
   text-align: center;
+  max-width: 780px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0;
+}
+
+.story-eyebrow-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--primary-light);
+  color: var(--primary);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  border: 1px solid var(--accent-peach);
+  margin-bottom: 16px;
+}
+
+.sparkle-bounce {
+  animation: gentlePulse 2s ease-in-out infinite;
 }
 
 .about-hero-title {
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 800;
-  color: #0f172a;
-  line-height: 1.2;
-  margin-bottom: 18px;
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 900;
+  color: var(--text-main);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
 }
 
 .about-hero-accent {
-  color: var(--primary);
+  background: linear-gradient(135deg, #ea580c 0%, #f97316 50%, #d97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .about-hero-desc {
-  font-size: 1rem;
+  font-size: 1.05rem;
   color: var(--text-muted);
   line-height: 1.65;
-  max-width: 520px;
-  margin: 0 auto 40px;
+  max-width: 640px;
+  margin: 0 auto;
 }
 
-.about-hero-image-wrap {
-  width: 100%;
-  border-radius: 20px;
-  overflow: hidden;
-  line-height: 0;
-}
-
-.about-hero-img {
-  width: 100%;
-  height: 480px;
-  object-fit: cover;
-  object-position: center 60%;
-  display: block;
-  border-radius: 20px;
-}
-
-/* ─────────────────────────────────
-   MISSION SECTION
-───────────────────────────────────*/
-.about-mission-section {
+/* ── 3D Stage Grid ── */
+.story-3d-stage-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 48px;
-  align-items: start;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 36px;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+  box-shadow: 0 16px 40px -12px rgba(234, 88, 12, 0.08), 0 4px 16px -4px rgba(28, 25, 23, 0.04);
+  position: relative;
+  overflow: hidden;
 }
 
-.about-mission-left {
+.story-3d-stage-grid::before {
+  content: "";
+  position: absolute;
+  top: -120px;
+  left: -120px;
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, rgba(234, 88, 12, 0.1) 0%, rgba(255, 247, 237, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─────────────────────────────────────────
+   FLUFFY 3D VIEWER STAGE & CANVAS
+───────────────────────────────────────── */
+.story-3d-toy-column {
+  position: relative;
+  z-index: 1;
+}
+
+.fluffy-3d-stage-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  min-height: 440px;
+  background: radial-gradient(circle at 50% 50%, #ffffff 0%, #fff7ed 65%, #ffedd5 100%);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  overflow: hidden;
+  box-shadow: inset 0 2px 8px rgba(234, 88, 12, 0.04);
+}
+
+.fluffy-3d-canvas-container {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  outline: none;
+  touch-action: none;
+}
+
+.fluffy-3d-canvas-container:active {
+  cursor: grabbing;
+}
+
+/* ── 3D Overlay UI Elements ── */
+.fluffy-3d-overlay-ui {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  padding: 16px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Status Badge */
+.toy-status-badge {
+  pointer-events: auto;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 4px 12px rgba(28, 25, 23, 0.06);
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: #16a34a;
+  border-radius: 50%;
+  animation: gentlePulse 1.8s infinite;
+}
+
+.toy-status-text {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.toy-3d-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+/* Pat Toast Bubble */
+.pat-toast-bubble {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #ea580c, #f97316);
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: var(--radius-full);
+  font-weight: 800;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 24px rgba(234, 88, 12, 0.35);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.heart-bounce {
+  animation: popBounce 0.6s ease infinite alternate;
+}
+
+/* Bottom Controls */
+.fluffy-3d-bottom-controls {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  align-self: flex-start;
+  box-shadow: 0 4px 12px rgba(28, 25, 23, 0.05);
+}
+
+.toy-action-btn {
+  background: transparent;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: var(--radius-full);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.toy-action-btn:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.toy-action-btn.active {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.toy-action-btn.pat-btn {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.toy-action-btn.pat-btn:hover {
+  background: #fecaca;
+  color: #b91c1c;
+}
+
+.spin-slow {
+  animation: spinSlow 8s linear infinite;
+}
+
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Fur Picker */
+.fluffy-fur-picker {
+  pointer-events: auto;
+  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 4px 12px rgba(28, 25, 23, 0.05);
+}
+
+.fur-picker-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.fur-swatch-rack {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fur-swatch-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+}
+
+.fur-swatch-btn:hover {
+  transform: scale(1.2);
+}
+
+.fur-swatch-btn.active {
+  transform: scale(1.25);
+  box-shadow: 0 0 0 2px #ea580c;
+}
+
+/* ─────────────────────────────────────────
+   LIVING CHAPTER STORY COLUMN
+───────────────────────────────────────── */
+.story-chapter-column {
+  position: relative;
+  z-index: 1;
+}
+
+.chapter-card-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Chapter Top Stepper */
+.chapter-nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chapter-pill-tag {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--accent-peach);
+}
+
+.chapter-stepper-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.step-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: none;
+  background: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.step-dot:hover {
+  background: #cbd5e1;
+  transform: scale(1.2);
+}
+
+.step-dot.active {
+  background: var(--primary);
+  width: 24px;
+  border-radius: 6px;
+}
+
+/* Narrative Content */
+.chapter-narrative-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 310px;
+}
+
+.chapter-badge-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.chapter-title {
+  font-size: clamp(1.4rem, 2.8vw, 1.95rem);
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.chapter-subtitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--primary);
+  line-height: 1.4;
+}
+
+.chapter-description {
+  font-size: 0.92rem;
+  color: #44403c;
+  line-height: 1.68;
+}
+
+.chapter-quote {
+  border-left: 3px solid var(--primary);
+  padding-left: 14px;
+  margin: 6px 0;
+  font-style: italic;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.chapter-3d-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  color: #92400e;
+  line-height: 1.45;
+}
+
+.chapter-3d-hint .hint-icon {
+  font-size: 1.1rem;
+}
+
+.chapter-stat-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-main);
+  background: var(--primary-light);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  align-self: flex-start;
+}
+
+/* Chapter Controls Footer */
+.chapter-card-footer {
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.chapter-nav-btns {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chapter-control-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  padding: 8px 18px;
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.chapter-control-btn:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.15);
+}
+
+.chapter-control-btn.next {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+.chapter-control-btn.next:hover {
+  background: #c2410c;
+  color: #ffffff;
+}
+
+.chapter-count-text {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.chapter-count-text strong {
+  color: var(--text-main);
+}
+
+/* ─────────────────────────────────────────
+   2. ANATOMY OF SOFTNESS (LAYERS)
+───────────────────────────────────────── */
+.about-anatomy-section {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.anatomy-header {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
 }
 
 .about-mission-title {
-  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  font-size: clamp(1.6rem, 3.2vw, 2.2rem);
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-main);
+  line-height: 1.3;
+}
+
+.anatomy-sub {
+  margin-top: 10px;
+  font-size: 0.98rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.anatomy-layers-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.anatomy-card {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-subtle);
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.anatomy-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-hover);
+}
+
+.anatomy-icon-box {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-md);
+  background: var(--primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.layer-step-num {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--primary);
+}
+
+.anatomy-card-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.anatomy-card-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+/* ─────────────────────────────────────────
+   3. WORKSHOP JOURNEY (TIMELINE)
+───────────────────────────────────────── */
+.about-workshop-section {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.workshop-header {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.workshop-timeline-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.workshop-step-card {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: var(--shadow-subtle);
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.workshop-step-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-card);
+}
+
+.step-badge {
+  width: 36px;
+  height: 36px;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 800;
+  font-size: 0.95rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--accent-peach);
+}
+
+.workshop-step-card h4 {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-main);
   line-height: 1.35;
 }
 
-.about-mission-right {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  padding-top: 36px; /* align with text under pre-label */
-}
-
-.about-mission-right p {
-  font-size: 0.97rem;
+.workshop-step-card p {
+  font-size: 0.84rem;
   color: var(--text-muted);
-  line-height: 1.75;
+  line-height: 1.6;
 }
 
-/* ─────────────────────────────────
-   WHY CHOOSE US SECTION
-───────────────────────────────────*/
+/* ─────────────────────────────────────────
+   4. WHY CHOOSE US / PROMISES
+───────────────────────────────────────── */
 .about-why-section {
   display: flex;
   flex-direction: column;
@@ -116,13 +682,15 @@
 
 .about-why-header {
   text-align: center;
+  max-width: 640px;
+  margin: 0 auto;
 }
 
 .about-why-title {
-  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  font-size: clamp(1.6rem, 3.2vw, 2.2rem);
   font-weight: 800;
-  color: #0f172a;
-  margin-top: 4px;
+  color: var(--text-main);
+  line-height: 1.3;
 }
 
 .about-why-grid {
@@ -133,65 +701,89 @@
 
 .about-why-card {
   background: #ffffff;
-  border: 1px solid #e8edf4;
-  border-radius: 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
   padding: 28px 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  box-shadow: var(--shadow-subtle);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.about-why-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-hover);
 }
 
 .about-why-icon {
   width: 44px;
   height: 44px;
-  border-radius: 12px;
-  background: #f1f5f9;
+  border-radius: var(--radius-sm);
+  background: #fff7ed;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
 
 .about-why-card h3 {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #0f172a;
-  line-height: 1.3;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-main);
 }
 
 .about-why-card p {
-  font-size: 0.87rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
   line-height: 1.6;
 }
 
-/* ─────────────────────────────────
-   CTA SECTION
-───────────────────────────────────*/
+/* ─────────────────────────────────────────
+   5. FINAL CALL TO ACTION
+───────────────────────────────────────── */
 .about-cta-section {
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%);
+  border: 1px solid var(--accent-peach);
+  border-radius: var(--radius-xl);
+  padding: 56px 32px;
   text-align: center;
-  background: #0f172a;
-  border-radius: 20px;
-  padding: 64px 48px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
+  box-shadow: 0 16px 36px -12px rgba(234, 88, 12, 0.12);
+}
+
+.cta-emblem-wrap {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 16px rgba(234, 88, 12, 0.15);
+  animation: floatSlow 4s ease-in-out infinite;
+}
+
+.cta-emblem-emoji {
+  font-size: 1.8rem;
 }
 
 .about-cta-title {
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
-  font-weight: 800;
-  color: #ffffff;
-  max-width: 520px;
-  line-height: 1.25;
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  font-weight: 900;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+  max-width: 620px;
 }
 
 .about-cta-desc {
-  font-size: 0.97rem;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+  color: #44403c;
   line-height: 1.65;
-  max-width: 460px;
+  max-width: 540px;
 }
 
 .about-cta-btn {
@@ -199,43 +791,61 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--primary) !important;
-  color: #fff !important;
+  padding: 14px 32px;
+  font-size: 0.96rem;
+  font-weight: 700;
 }
 
-/* ─────────────────────────────────
-   RESPONSIVE
-───────────────────────────────────*/
-@media (max-width: 900px) {
+/* ─────────────────────────────────────────
+   RESPONSIVE BREAKPOINTS
+───────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .story-3d-stage-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 20px;
+  }
+
+  .fluffy-3d-stage-wrapper {
+    min-height: 380px;
+  }
+
+  .workshop-timeline-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .about-why-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .about-page {
-    gap: 56px;
-    padding: 40px 16px 64px;
+    padding: 24px 16px 60px;
+    gap: 48px;
   }
 
-  .about-hero-img {
-    height: 260px;
+  .fluffy-3d-stage-wrapper {
+    min-height: 320px;
   }
 
-  .about-mission-section {
+  .anatomy-layers-grid {
     grid-template-columns: 1fr;
-    gap: 24px;
   }
 
-  .about-mission-right {
-    padding-top: 0;
+  .workshop-timeline-grid {
+    grid-template-columns: 1fr;
   }
 
   .about-why-grid {
     grid-template-columns: 1fr;
   }
 
-  .about-cta-section {
-    padding: 40px 24px;
+  .fluffy-3d-bottom-controls {
+    flex-wrap: wrap;
+  }
+
+  .fluffy-fur-picker {
+    display: none; /* Hide fur swatches on mobile to keep 3D stage clutter-free */
   }
 }

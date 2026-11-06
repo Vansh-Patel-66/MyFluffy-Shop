@@ -1,9 +1,12 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { productAPI, categoryAPI, getImageUrl } from "../../utils/api";
 import { formatPrice, getEffectivePrice } from "../../utils/currency";
 import { useCart } from "../../context/CartContext";
-import { Star, Search, SlidersHorizontal, ShoppingBag, X } from "lucide-react";
+import { Star, Search, SlidersHorizontal, ShoppingBag, X, Sparkles, ArrowDown } from "lucide-react";
 import "../../style/shop.css";
+
+const ITEMS_PER_ROW = 3;
+const INITIAL_ROWS = 3; // Top 3 rows visible on page load = 9 items
 
 const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelectedCategory: setExternalCategory }) => {
   const { addToCart } = useCart();
@@ -17,6 +20,11 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
   const [maxPrice, setMaxPrice] = useState(150);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [sortBy, setSortBy] = useState("featured");
+
+  // Scroll reveal state: starts with 3 rows (9 products)
+  const [visibleRows, setVisibleRows] = useState(INITIAL_ROWS);
+  const [isLoadingNextRow, setIsLoadingNextRow] = useState(false);
+  const sentinelRef = useRef(null);
 
   useEffect(() => {
     const fetchShopCatalog = async () => {
@@ -55,6 +63,11 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
     }
   }, [externalCategory, categories]);
 
+  // Reset to top 3 rows whenever any filter changes
+  useEffect(() => {
+    setVisibleRows(INITIAL_ROWS);
+  }, [selectedCategory, searchQuery, maxPrice, inStockOnly, sortBy]);
+
   const handleProductClick = (product) => {
     if (setSelectedProduct) {
       setSelectedProduct(product);
@@ -74,24 +87,22 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
     setMaxPrice(150);
     setInStockOnly(false);
     setSortBy("featured");
+    setVisibleRows(INITIAL_ROWS);
     if (setExternalCategory) {
       setExternalCategory("all");
     }
   };
 
-  // Filter and Sort Logic using true USD prices
+  // Filter and Sort Logic
   const filteredProducts = useMemo(() => {
     return products
       .filter((product) => {
-        // 1. Active status check
         if (!product.is_active) return false;
 
-        // 2. Category check
         if (selectedCategory !== "all" && product.category_id !== selectedCategory) {
           return false;
         }
 
-        // 3. Search query check
         if (searchQuery.trim() !== "") {
           const q = searchQuery.toLowerCase().trim();
           const nameMatches = (product.name || "").toLowerCase().includes(q);
@@ -99,12 +110,10 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
           if (!nameMatches && !descMatches) return false;
         }
 
-        // 4. In-stock check
         if (inStockOnly && (product.stock || 0) <= 0) {
           return false;
         }
 
-        // 5. Price check using true effective price
         const effectivePrice = getEffectivePrice(product.selling_price, product.discount);
         if (effectivePrice > maxPrice) {
           return false;
@@ -119,21 +128,56 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
         if (sortBy === "price-low") return priceA - priceB;
         if (sortBy === "price-high") return priceB - priceA;
         if (sortBy === "alpha") return a.name.localeCompare(b.name);
-        // Featured / Newest
+        // Featured
         if (a.featured_on_homepage && !b.featured_on_homepage) return -1;
         if (!a.featured_on_homepage && b.featured_on_homepage) return 1;
         return new Date(b.created_at || 0) - new Date(a.created_at || 0);
       });
   }, [products, selectedCategory, searchQuery, inStockOnly, maxPrice, sortBy]);
 
+  const totalFilteredCount = filteredProducts.length;
+  const totalAvailableRows = Math.ceil(totalFilteredCount / ITEMS_PER_ROW);
+  const currentVisibleCount = Math.min(visibleRows * ITEMS_PER_ROW, totalFilteredCount);
+  const visibleProducts = filteredProducts.slice(0, currentVisibleCount);
+  const hasMoreRows = visibleRows < totalAvailableRows;
+
+  // Reveal next row function
+  const revealNextRow = useCallback(() => {
+    if (hasMoreRows && !isLoadingNextRow) {
+      setIsLoadingNextRow(true);
+      setTimeout(() => {
+        setVisibleRows((prev) => prev + 1);
+        setIsLoadingNextRow(false);
+      }, 250);
+    }
+  }, [hasMoreRows, isLoadingNextRow]);
+
+  // Scroll observer: triggers next row reveal automatically when user scrolls near the bottom
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasMoreRows) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMoreRows && !isLoadingNextRow) {
+          revealNextRow();
+        }
+      },
+      { root: null, rootMargin: "250px", threshold: 0.1 }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMoreRows, isLoadingNextRow, revealNextRow]);
+
   return (
     <div className="shop-page animate-fade-in">
-      {/* ── SHOP HEADER ── */}
+      {/* ── SHOP HERO HEADER ── */}
       <header className="shop-hero-header">
-        <span className="shop-eyebrow">THE ARCHIVE</span>
-        <h1 className="shop-page-title">Curated Cozy Catalog</h1>
+        <span className="shop-eyebrow">OUR COLLECTION</span>
+        <h1 className="shop-page-title">Curated Comfort Catalog</h1>
         <p className="shop-page-sub">
-          Every item is crafted with premium micro-plush fibers, cloud-fill stuffing, and child-safe construction.
+          Handcrafted plushies, velveteen blankets, and cloud contour pillows — designed for genuine coziness.
         </p>
 
         {/* Global Catalog Search Bar */}
@@ -141,7 +185,7 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
           <Search size={18} className="search-bar-icon" />
           <input
             type="text"
-            placeholder="Search plushies, blankets, or contour pillows..."
+            placeholder="Search plushies, blankets, pillows..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="shop-search-input"
@@ -167,7 +211,7 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
             </span>
             {(selectedCategory !== "all" || searchQuery || maxPrice < 150 || inStockOnly) && (
               <button className="reset-filters-btn" onClick={handleResetFilters}>
-                Reset
+                Reset All
               </button>
             )}
           </div>
@@ -180,7 +224,7 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
                 className={`category-pill-btn ${selectedCategory === "all" ? "active" : ""}`}
                 onClick={() => handleCategorySelect("all")}
               >
-                <span>All Collections</span>
+                <span>All Products</span>
                 <span className="pill-count">{products.filter((p) => p.is_active).length}</span>
               </button>
               {categories.map((cat) => {
@@ -259,11 +303,16 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
 
         {/* ── MAIN PRODUCT SHELF ── */}
         <main className="shop-main">
-          {/* Results count & status */}
+          {/* Results Header Status */}
           <div className="catalog-meta-bar">
             <p className="results-count-text">
-              Showing <strong>{filteredProducts.length}</strong> {filteredProducts.length === 1 ? "piece" : "pieces"}
+              Showing <strong>{currentVisibleCount}</strong> of <strong>{totalFilteredCount}</strong> cozy pieces
             </p>
+            {hasMoreRows && (
+              <span className="scroll-hint-pill">
+                <ArrowDown size={13} className="bounce-arrow-icon" /> Scroll down to unfold more rows
+              </span>
+            )}
           </div>
 
           {loading ? (
@@ -271,90 +320,109 @@ const Shop = ({ setSelectedProduct, selectedCategory: externalCategory, setSelec
               <span className="spinner"></span>
               <p>Fetching cozy products...</p>
             </div>
-          ) : filteredProducts.length > 0 ? (
-            <div className="products-grid">
-              {filteredProducts.map((product) => {
-                const effectivePrice = getEffectivePrice(product.selling_price, product.discount);
-                const hasDiscount = parseFloat(product.discount) > 0;
-                const isLowStock = (product.stock || 0) > 0 && (product.stock || 0) <= 5;
-                const imgSource = getImageUrl(product.image_url) || "https://images.unsplash.com/photo-1559251606-c623743a6d76?q=80&w=600&auto=format&fit=crop";
+          ) : visibleProducts.length > 0 ? (
+            <>
+              {/* Product Grid: 3 Clean Columns with Top 3 Rows Initially */}
+              <div className="products-grid-three">
+                {visibleProducts.map((product, index) => {
+                  const effectivePrice = getEffectivePrice(product.selling_price, product.discount);
+                  const hasDiscount = parseFloat(product.discount) > 0;
+                  const isLowStock = (product.stock || 0) > 0 && (product.stock || 0) <= 5;
+                  const imgSource = getImageUrl(product.image_url) || "https://images.unsplash.com/photo-1559251606-c623743a6d76?q=80&w=600&auto=format&fit=crop";
 
-                return (
-                  <article
-                    key={product.id}
-                    className="product-boutique-card"
-                    onClick={() => handleProductClick(product)}
-                  >
-                    <div className="product-image-container">
-                      <img
-                        src={imgSource}
-                        alt={product.name}
-                        className="product-card-thumbnail"
-                        loading="lazy"
-                      />
+                  return (
+                    <article
+                      key={product.id}
+                      className="product-boutique-card"
+                      style={{ animationDelay: `${(index % ITEMS_PER_ROW) * 0.08}s` }}
+                      onClick={() => handleProductClick(product)}
+                    >
+                      <div className="product-image-container">
+                        <img
+                          src={imgSource}
+                          alt={product.name}
+                          className="product-card-thumbnail"
+                          loading="lazy"
+                        />
 
-                      {/* Tag badges */}
-                      <div className="product-badge-rack">
-                        {hasDiscount && (
-                          <span className="boutique-tag tag-discount">
-                            Save {Math.round(parseFloat(product.discount))}%
-                          </span>
-                        )}
-                        {product.featured_on_homepage && (
-                          <span className="boutique-tag tag-bestseller">
-                            Bestseller
-                          </span>
-                        )}
-                        {isLowStock && (
-                          <span className="boutique-tag tag-lowstock">
-                            Only {product.stock} Left
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Quick Add Overlay */}
-                      <div className="product-card-hover-actions">
-                        <button
-                          className="quick-add-btn"
-                          title="Add to Bag"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            addToCart(product, 1);
-                          }}
-                        >
-                          <ShoppingBag size={16} /> Quick Add
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="product-content-block">
-                      <div className="product-rating-line">
-                        <div className="rating-stars">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} size={13} fill="#d99b45" color="#d99b45" />
-                          ))}
+                        {/* Tag badges */}
+                        <div className="product-badge-rack">
+                          {hasDiscount && (
+                            <span className="boutique-tag tag-discount">
+                              Save {Math.round(parseFloat(product.discount))}%
+                            </span>
+                          )}
+                          {product.featured_on_homepage && (
+                            <span className="boutique-tag tag-bestseller">
+                              Bestseller
+                            </span>
+                          )}
+                          {isLowStock && (
+                            <span className="boutique-tag tag-lowstock">
+                              Only {product.stock} Left
+                            </span>
+                          )}
                         </div>
-                        <span className="rating-count">(400+)</span>
+
+                        {/* Quick Add Overlay */}
+                        <div className="product-card-hover-actions">
+                          <button
+                            className="quick-add-btn"
+                            title="Add to Bag"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addToCart(product, 1);
+                            }}
+                          >
+                            <ShoppingBag size={16} /> Quick Add
+                          </button>
+                        </div>
                       </div>
 
-                      <h3 className="product-title-text">{product.name}</h3>
+                      <div className="product-content-block">
+                        <div className="product-rating-line">
+                          <div className="rating-stars">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} size={13} fill="#f59e0b" color="#f59e0b" />
+                            ))}
+                          </div>
+                          <span className="rating-count">(400+)</span>
+                        </div>
 
-                      <div className="product-price-row">
-                        <span className="price-effective">{formatPrice(effectivePrice)}</span>
-                        {hasDiscount && (
-                          <span className="price-original">{formatPrice(product.selling_price)}</span>
-                        )}
+                        <h3 className="product-title-text">{product.name}</h3>
+
+                        <div className="product-price-row">
+                          <span className="price-effective">{formatPrice(effectivePrice)}</span>
+                          {hasDiscount && (
+                            <span className="price-original">{formatPrice(product.selling_price)}</span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
+                    </article>
+                  );
+                })}
+              </div>
+
+              {/* Sentinel element to trigger scroll loading for next row */}
+              <div ref={sentinelRef} className="scroll-sentinel-anchor">
+                {hasMoreRows ? (
+                  <div className="scroll-loading-more">
+                    <span className="spinner-sm"></span>
+                    <span>Unfolding next cozy row...</span>
+                  </div>
+                ) : (
+                  <div className="end-of-collection-banner">
+                    <Sparkles size={16} color="var(--primary)" />
+                    <span>You've seen all {totalFilteredCount} cozy handcrafted pieces.</span>
+                  </div>
+                )}
+              </div>
+            </>
           ) : (
             <div className="no-matches-container">
               <div className="no-matches-icon">🔍</div>
-              <h3>No matching cozy items found</h3>
-              <p>Try widening your price range or adjusting your search term.</p>
+              <h3>No matching items found</h3>
+              <p>Try clearing filters or adjusting your search keyword.</p>
               <button className="btn-secondary" onClick={handleResetFilters}>
                 Clear All Filters
               </button>

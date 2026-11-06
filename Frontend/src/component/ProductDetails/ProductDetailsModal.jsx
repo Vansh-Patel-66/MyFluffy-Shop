@@ -125,7 +125,7 @@ const ProductDetailsModal = ({ product, onClose }) => {
             <div style={styles.ratingsRow}>
               <div style={styles.starCluster}>
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={15} fill="#d99b45" color="#d99b45" />
+                  <Star key={i} size={15} fill="#f59e0b" color="#f59e0b" />
                 ))}
               </div>
               <span style={styles.ratingText}>4.96 &bull; 412 Verified Reviews</span>
@@ -360,7 +360,7 @@ const styles = {
     aspectRatio: "1",
     borderRadius: "18px",
     overflow: "hidden",
-    backgroundColor: "#f7f3ee",
+    backgroundColor: "#fbf5ee",
   },
   mainImage: {
     width: "100%",
@@ -391,7 +391,7 @@ const styles = {
     overflow: "hidden",
     border: "2px solid transparent",
     padding: 0,
-    backgroundColor: "#f7f3ee",
+    backgroundColor: "#fbf5ee",
     cursor: "pointer",
     flexShrink: 0,
   },

@@ -127,9 +127,10 @@
 /* ── Form Panel (right) ── */
 .contact-form-panel {
   background: #fff;
-  border: 1px solid #e8edf4;
-  border-radius: 20px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   padding: 40px;
+  box-shadow: var(--shadow-card);
 }
 
 .contact-form-heading {
@@ -193,7 +194,7 @@
 .contact-field input:focus,
 .contact-field textarea:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
   background: #fff;
 }
 

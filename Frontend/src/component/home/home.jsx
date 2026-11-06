@@ -83,14 +83,14 @@ const Home = ({ setActivePage, setSelectedProduct, setSelectedCategory }) => {
             {/* Social proof strip */}
             <div className="hero-social-proof">
               <div className="customer-avatars-cluster">
-                <span className="customer-avatar-dot" style={{ background: "#c86b52" }}>🧸</span>
-                <span className="customer-avatar-dot" style={{ background: "#d99b45" }}>✨</span>
-                <span className="customer-avatar-dot" style={{ background: "#758a7a" }}>🤍</span>
+                <span className="customer-avatar-dot" style={{ background: "#2563eb" }}>🧸</span>
+                <span className="customer-avatar-dot" style={{ background: "#0284c7" }}>✨</span>
+                <span className="customer-avatar-dot" style={{ background: "#3b82f6" }}>🤍</span>
               </div>
               <div className="social-proof-meta">
                 <div className="stars-cluster">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={14} fill="#d99b45" color="#d99b45" />
+                    <Star key={i} size={14} fill="#f59e0b" color="#f59e0b" />
                   ))}
                   <span className="rating-score-num">4.96 / 5.0</span>
                 </div>
@@ -112,7 +112,7 @@ const Home = ({ setActivePage, setSelectedProduct, setSelectedCategory }) => {
               </div>
               <div className="hero-overlay-tag bottom-left">
                 <div className="tag-icon-circle">
-                  <Sparkles size={16} color="#c86b52" />
+                  <Sparkles size={16} color="#2563eb" />
                 </div>
                 <div>
                   <span className="tag-micro">FAN FAVORITE</span>
@@ -280,7 +280,7 @@ const Home = ({ setActivePage, setSelectedProduct, setSelectedCategory }) => {
                     <div className="product-rating-line">
                       <div className="rating-stars">
                         {[...Array(5)].map((_, i) => (
-                          <Star key={i} size={13} fill="#d99b45" color="#d99b45" />
+                          <Star key={i} size={13} fill="#f59e0b" color="#f59e0b" />
                         ))}
                       </div>
                       <span className="rating-count">(400+)</span>
@@ -353,7 +353,7 @@ const Home = ({ setActivePage, setSelectedProduct, setSelectedCategory }) => {
             </ul>
 
             <button className="btn-primary" onClick={() => setActivePage("about")}>
-              Discover Our Story <ArrowRight size={16} />
+              <Sparkles size={16} /> Explore Our Story in 3D <ArrowRight size={16} />
             </button>
           </div>
         </div>
@@ -370,7 +370,7 @@ const Home = ({ setActivePage, setSelectedProduct, setSelectedCategory }) => {
           <div className="testimonial-card">
             <div className="testimonial-stars">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} size={15} fill="#d99b45" color="#d99b45" />
+                <Star key={i} size={15} fill="#f59e0b" color="#f59e0b" />
               ))}
             </div>
             <p className="testimonial-quote">
@@ -385,7 +385,7 @@ const Home = ({ setActivePage, setSelectedProduct, setSelectedCategory }) => {
           <div className="testimonial-card">
             <div className="testimonial-stars">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} size={15} fill="#d99b45" color="#d99b45" />
+                <Star key={i} size={15} fill="#f59e0b" color="#f59e0b" />
               ))}
             </div>
             <p className="testimonial-quote">
@@ -400,7 +400,7 @@ const Home = ({ setActivePage, setSelectedProduct, setSelectedCategory }) => {
           <div className="testimonial-card">
             <div className="testimonial-stars">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} size={15} fill="#d99b45" color="#d99b45" />
+                <Star key={i} size={15} fill="#f59e0b" color="#f59e0b" />
               ))}
             </div>
             <p className="testimonial-quote">

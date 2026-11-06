@@ -473,7 +473,7 @@ const orderStyles = {
     height: "50px",
     borderRadius: "10px",
     objectFit: "cover",
-    backgroundColor: "#f7f3ee",
+    backgroundColor: "#fbf5ee",
   },
   itemMeta: {
     display: "flex",
