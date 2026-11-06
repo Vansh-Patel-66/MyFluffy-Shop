@@ -12,19 +12,31 @@ export const createCategory = async (req, res) => {
 
 export const getCategories = async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
-    const records = await Category.findAll();
+    const { page, limit } = req.query;
+    const records = await Category.findAll({
+      order: [['created_at', 'ASC']]
+    });
     
-    // Manual JavaScript pagination
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
-    const paginatedRecords = records.slice(startIndex, endIndex);
-    
+    if (page || limit) {
+      const p = parseInt(page) || 1;
+      const l = parseInt(limit) || 50;
+      const startIndex = (p - 1) * l;
+      const endIndex = p * l;
+      const paginatedRecords = records.slice(startIndex, endIndex);
+
+      return res.status(200).json({
+        total: records.length,
+        page: p,
+        limit: l,
+        data: paginatedRecords
+      });
+    }
+
     res.status(200).json({
       total: records.length,
-      page: parseInt(page),
-      limit: parseInt(limit),
-      data: paginatedRecords
+      page: 1,
+      limit: records.length,
+      data: records
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
