@@ -1,5 +1,11 @@
 import Joi from "joi";
 
+const imageUrlValidation = Joi.string().custom((val, helpers) => {
+  if (!val) return val;
+  if (val.startsWith('/public/') || /^https?:\/\//.test(val)) return val;
+  return helpers.error('string.uri');
+}).allow(null, '').optional();
+
 export const createProductSchema = Joi.object({
   name: Joi.string().required(),
   slug: Joi.string().optional(),
@@ -9,8 +15,8 @@ export const createProductSchema = Joi.object({
   discount: Joi.number().optional(),
   stock: Joi.number().integer().optional(),
   category_id: Joi.string().uuid().allow(null, '').optional(),
-  image_url: Joi.string().allow(null, '').optional(),
-  image_urls: Joi.array().items(Joi.string().allow(null, '')).optional(),
+  image_url: imageUrlValidation,
+  image_urls: Joi.array().items(imageUrlValidation).optional(),
   badge: Joi.string().optional(),
   rating: Joi.number().optional(),
   number_of_ratings: Joi.number().integer().optional(),
@@ -31,8 +37,8 @@ export const updateProductSchema = Joi.object({
   discount: Joi.number().optional(),
   stock: Joi.number().integer().optional(),
   category_id: Joi.string().uuid().allow(null, '').optional(),
-  image_url: Joi.string().allow(null, '').optional(),
-  image_urls: Joi.array().items(Joi.string().allow(null, '')).optional(),
+  image_url: imageUrlValidation,
+  image_urls: Joi.array().items(imageUrlValidation).optional(),
   badge: Joi.string().optional(),
   rating: Joi.number().optional(),
   number_of_ratings: Joi.number().integer().optional(),

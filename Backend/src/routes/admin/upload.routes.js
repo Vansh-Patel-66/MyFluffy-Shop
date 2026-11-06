@@ -2,11 +2,15 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
-// Ensure uploads directory exists
-const uploadDir = path.join(process.cwd(), "public", "uploads");
+// Ensure uploads directory exists in Backend/public/uploads (never in project root)
+const uploadDir = path.resolve(__dirname, "../../../public/uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -24,7 +28,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
 });
 
 router.post("/", upload.single("image"), (req, res) => {
@@ -33,7 +37,7 @@ router.post("/", upload.single("image"), (req, res) => {
       return res.status(400).json({ success: false, message: "No file uploaded" });
     }
     
-    // Construct a relative URL for the uploaded file
+    // Construct relative URL for the uploaded file
     const imageUrl = `/public/uploads/${req.file.filename}`;
     
     res.status(200).json({ success: true, url: imageUrl });
