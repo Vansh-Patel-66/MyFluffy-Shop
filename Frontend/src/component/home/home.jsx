@@ -103,7 +103,7 @@ const Home = ({ setActivePage, setSelectedProduct, setSelectedCategory }) => {
             <div className="hero-image-frame">
               <img
                 src="https://images.unsplash.com/photo-1540518614846-7ede433c4ef4?q=80&w=1200&auto=format&fit=crop"
-                alt="Cozy tactile lifestyle pillows and blankets"
+                alt="image of a cozy bedroom with plush pillows and blankets"
                 className="hero-featured-image"
               />
               <div className="hero-overlay-tag top-right">
